@@ -1,5 +1,14 @@
 var canvas = null;
 
+/*
+    Map for play
+    0: moveable tile
+    1: immoveable tile
+    4: powerup 1
+    5: powerup 2
+    8: player 1
+    9: player 2
+*/
 var map = [
     8, 0, 0, 0, 0, 0, 0, 0, 0, 0,
     0, 1, 1, 1, 0, 0, 0, 0, 0, 0,
@@ -16,6 +25,7 @@ var map = [
 var screenHeight = window.innerHeight-window.innerHeight/10;
 var screenWidth = window.screen.width;
 
+//Change this to screenWidth for production
 var display = screenHeight;
 
 var mapWidth = 10, mapHeight = 10;
@@ -24,7 +34,7 @@ var tileWidth = display/mapWidth, tileHeight = display/mapHeight;
 var currentPlayer = 8;
 var currentLocation = {x:0,y:0};
 
-
+//Setup the canvas environment
 window.onload = function()
 {
     canvas = document.getElementById('tag').getContext('2d');
@@ -34,6 +44,7 @@ window.onload = function()
     requestAnimationFrame(drawGame);
 };
 
+//Draw the canvas
 function drawGame()
 {
     if(canvas==null) {return;}
@@ -72,6 +83,7 @@ function drawGame()
     }
 }
 
+//Get the location of the current player
 function getLocation()
 {  
     for(var y = 0; y < mapHeight; y++)
@@ -92,6 +104,7 @@ function updateFrame()
     requestAnimationFrame(drawGame);
 }
 
+//Check if position is legal
 function legalMove(posX, posY)
 {
     if (posY >= 0 && posY < mapHeight && posX >= 0 && posX < mapWidth)
@@ -104,6 +117,7 @@ function legalMove(posX, posY)
     return false;
 }
 
+//Move in a direction
 function move(direction)
 {
     if (direction == "UP")
@@ -170,9 +184,11 @@ function pressRight()
 
 function pressSubmit()
 {
+    //TODO: Remove this
     switchPlayer();
 }
 
+//DEBUG function
 function switchPlayer()
 {
     if (currentPlayer == 8)
