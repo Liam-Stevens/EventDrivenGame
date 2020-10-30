@@ -13,18 +13,24 @@ var map = [
     0, 0, 0, 0, 0, 0, 0, 0, 0, 9,
 ];
 
+var screenHeight = window.innerHeight-window.innerHeight/10;
+var screenWidth = window.screen.width;
+
+var display = screenHeight;
+
 var mapWidth = 10, mapHeight = 10;
-var tileWidth = window.screen.width/mapWidth, tileHeight = window.screen.width/mapHeight;
+var tileWidth = display/mapWidth, tileHeight = display/mapHeight;
 
-var currentPlayer = 1;
-
+var currentPlayer = 8;
+var currentLocation = {x:0,y:0};
 
 
 window.onload = function()
 {
     canvas = document.getElementById('tag').getContext('2d');
-    document.getElementById('tag').setAttribute("height", window.screen.width);
-    document.getElementById('tag').setAttribute("width", window.screen.width);
+    document.getElementById('tag').setAttribute("height", display);
+    document.getElementById('tag').setAttribute("width", display);
+    getLocation();
     requestAnimationFrame(drawGame);
 };
 
@@ -66,33 +72,116 @@ function drawGame()
     }
 }
 
+function getLocation()
+{  
+    for(var y = 0; y < mapHeight; y++)
+    {
+        for(var x = 0; x < mapWidth; x++)
+        {
+            if (map[((y*mapWidth)+x)] == currentPlayer)
+            {
+                currentLocation.x = x;
+                currentLocation.y = y;
+            }
+        }
+    }
+}
+
 function updateFrame()
 {
     requestAnimationFrame(drawGame);
 }
 
+function legalMove(posX, posY)
+{
+    if (posY >= 0 && posY < mapHeight && posX >= 0 && posX < mapWidth)
+    {
+        if (map[((posY*mapWidth)+posX)] != 1)
+        {
+            return true;
+        }
+    }
+    return false;
+}
+
+function move(direction)
+{
+    if (direction == "UP")
+    {
+        if (legalMove(currentLocation.x,currentLocation.y-1))
+        {
+            map[(((currentLocation.y)*mapWidth)+currentLocation.x)] = 0;
+            currentLocation.y = currentLocation.y-1;
+            map[(((currentLocation.y)*mapWidth)+currentLocation.x)] = currentPlayer;
+        }
+    }
+    else if (direction == "DOWN")
+    {
+        if (legalMove(currentLocation.x,currentLocation.y+1))
+        {
+            map[(((currentLocation.y)*mapWidth)+currentLocation.x)] = 0;
+            currentLocation.y = currentLocation.y+1;
+            map[(((currentLocation.y)*mapWidth)+currentLocation.x)] = currentPlayer;
+        }
+    }
+    else if (direction == "LEFT")
+    {
+        if (legalMove(currentLocation.x-1,currentLocation.y))
+        {
+            map[(((currentLocation.y)*mapWidth)+currentLocation.x)] = 0;
+            currentLocation.x = currentLocation.x-1;
+            map[(((currentLocation.y)*mapWidth)+currentLocation.x)] = currentPlayer;
+        }
+    }
+    else if (direction == "RIGHT")
+    {
+        if (legalMove(currentLocation.x+1,currentLocation.y))
+        {
+            map[(((currentLocation.y)*mapWidth)+currentLocation.x)] = 0;
+            currentLocation.x = currentLocation.x+1;
+            map[(((currentLocation.y)*mapWidth)+currentLocation.x)] = currentPlayer;
+        }
+    }
+}
+
 function pressUp()
 {
-    map[2] = 1;
+    move("UP");
     updateFrame();
 }
 
 function pressDown()
 {
+    move("DOWN");
     updateFrame();
 }
 
 function pressLeft()
 {
+    move("LEFT");
     updateFrame();
 }
 
 function pressRight()
 {
+    move("RIGHT");
     updateFrame();
 }
 
 function pressSubmit()
 {
-    
+    switchPlayer();
+}
+
+function switchPlayer()
+{
+    if (currentPlayer == 8)
+    {
+        currentPlayer = 9;
+    }
+    else
+    {
+        currentPlayer = 8;
+    }
+    getLocation();
 }
