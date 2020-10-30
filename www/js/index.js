@@ -1,29 +1,98 @@
-/*
- * Licensed to the Apache Software Foundation (ASF) under one
- * or more contributor license agreements.  See the NOTICE file
- * distributed with this work for additional information
- * regarding copyright ownership.  The ASF licenses this file
- * to you under the Apache License, Version 2.0 (the
- * "License"); you may not use this file except in compliance
- * with the License.  You may obtain a copy of the License at
- *
- * http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
- */
+var canvas = null;
 
-// Wait for the deviceready event before using any of Cordova's device APIs.
-// See https://cordova.apache.org/docs/en/latest/cordova/events/events.html#deviceready
-document.addEventListener('deviceready', onDeviceReady, false);
+var map = [
+    8, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    0, 1, 1, 1, 0, 0, 0, 0, 0, 0,
+    0, 1, 0, 0, 0, 4, 0, 0, 0, 0,
+    0, 1, 0, 0, 1, 1, 0, 0, 0, 0,
+    0, 0, 1, 0, 0, 0, 0, 1, 0, 0,
+    0, 0, 1, 0, 0, 0, 0, 1, 0, 0,
+    0, 0, 0, 0, 1, 1, 0, 0, 1, 0,
+    0, 0, 0, 5, 0, 0, 0, 0, 1, 0,
+    0, 0, 0, 0, 0, 0, 1, 1, 1, 0,
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 9,
+];
 
-function onDeviceReady() {
-    // Cordova is now initialized. Have fun!
+var mapWidth = 10, mapHeight = 10;
+var tileWidth = window.screen.width/mapWidth, tileHeight = window.screen.width/mapHeight;
 
-    console.log('Running cordova-' + cordova.platformId + '@' + cordova.version);
-    document.getElementById('deviceready').classList.add('ready');
+var currentPlayer = 1;
+
+
+
+window.onload = function()
+{
+    canvas = document.getElementById('tag').getContext('2d');
+    document.getElementById('tag').setAttribute("height", window.screen.width);
+    document.getElementById('tag').setAttribute("width", window.screen.width);
+    requestAnimationFrame(drawGame);
+};
+
+function drawGame()
+{
+    if(canvas==null) {return;}
+    
+    for(var y = 0; y < mapHeight; y++)
+    {
+        for(var x = 0; x < mapWidth; x++)
+        {
+            switch(map[((y*mapWidth)+x)])
+            {
+                case 0:
+                    canvas.fillStyle = "#ffffff";
+                    break;
+                case 1:
+                    canvas.fillStyle = "#444444";
+                    break;
+                case 4:
+                    canvas.fillStyle = "#f6fa00";
+                    break;
+                case 5:
+                    canvas.fillStyle = "#1fcc44";
+                    break;
+                case 8:
+                    canvas.fillStyle = "#03adfc";
+                    break;
+                case 9:
+                    canvas.fillStyle = "#fc0390";
+                    break;
+                default:
+                    canvas.fillStyle = "#000000";
+                    break;                    
+            }
+            
+            canvas.fillRect(x*tileWidth, y*tileHeight, tileWidth, tileHeight);
+        }
+    }
+}
+
+function updateFrame()
+{
+    requestAnimationFrame(drawGame);
+}
+
+function pressUp()
+{
+    map[2] = 1;
+    updateFrame();
+}
+
+function pressDown()
+{
+    updateFrame();
+}
+
+function pressLeft()
+{
+    updateFrame();
+}
+
+function pressRight()
+{
+    updateFrame();
+}
+
+function pressSubmit()
+{
+    
 }
