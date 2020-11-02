@@ -6,10 +6,10 @@ var dispStamina = null;
     Map for play
     0: moveable tile
     1: immoveable tile
-    4: powerup 1
-    5: powerup 2
-    8: player 1
-    9: player 2
+    4: movement powerup
+    5: vision powerup
+    8: chaser
+    9: runner
 */
 var map = [
     8, 0, 0, 0, 0, 0, 0, 0, 0, 0,
@@ -53,68 +53,87 @@ window.onload = function()
     document.getElementById('tag').setAttribute("height", display);
     document.getElementById('tag').setAttribute("width", display);
     updateFrame();
+    
+    
 };
 
-function callEvent(event)
-{
-    if (event == "thisPlayerMoveUp")
-    {
-        move(currentPlayer, "UP");
-    }
-    else if (event == "thisPlayerMoveDown")
-    {
-        move(currentPlayer, "DOWN");
-    }
-    else if (event == "thisPlayerMoveLeft")
-    {
-        move(currentPlayer, "LEFT");
-    }
-    else if (event == "thisPlayerMoveRight")
-    {
-        move(currentPlayer, "RIGHT");
-    }
-    else if (event == "thisPlayerEndTurn")
-    {
-
-    }
-    else if (event == "thisPlayerVisionPow")
-    {
-        
-    }
-    else if (event == "thisPlayerMovePow")
-    {
-        
-    }
-    else if (event == "oppPlayerMoveUp")
-    {
-        move(oppPlayer, "UP");
-    }
-    else if (event == "oppPlayerMoveDown")
-    {
-        move(oppPlayer, "DOWN");
-    }
-    else if (event == "oppPlayerMoveLeft")
-    {
-        move(oppPlayer, "LEFT");
-    }
-    else if (event == "oppPlayerMoveRight")
-    {
-        move(oppPlayer, "RIGHT");
-    }
-    else if (event == "oppPlayerEndTurn")
-    {
-        
-    }
-    else if (event == "oppPlayerVisionPow")
-    {
-        
-    }
-    else if (event == "oppPlayerMovePow")
-    {
-        
-    }
+var thisPlayerMoveUp = new Event("thisPlayerMoveUp");
+window.addEventListener("thisPlayerMoveUp", function () { 
+    move(currentPlayer, "UP");
     updateFrame();
-}
+});
+
+var thisPlayerMoveDown = new Event("thisPlayerMoveDown");
+window.addEventListener("thisPlayerMoveDown", function () { 
+    move(currentPlayer, "DOWN");
+    updateFrame();
+});
+
+var thisPlayerMoveLeft = new Event("thisPlayerMoveLeft");
+window.addEventListener("thisPlayerMoveLeft", function () { 
+    move(currentPlayer, "LEFT");
+    updateFrame();
+});
+
+var thisPlayerMoveRight = new Event("thisPlayerMoveRight");
+window.addEventListener("thisPlayerMoveRight", function () { 
+    move(currentPlayer, "RIGHT");
+    updateFrame();
+});
+
+var thisPlayerEndTurn = new Event("thisPlayerEndTurn");
+window.addEventListener("thisPlayerEndTurn", function () { 
+    
+});
+
+var thisPlayerVisionPow = new Event("thisPlayerVisionPow");
+window.addEventListener("thisPlayerVisionPow", function () { 
+
+});
+
+var thisPlayerMovePow = new Event("thisPlayerMovePow");
+window.addEventListener("thisPlayerMovePow", function () { 
+
+});
+
+var oppPlayerMoveUp = new Event("oppPlayerMoveUp");
+window.addEventListener("oppPlayerMoveUp", function () { 
+    move(oppPlayer, "UP");
+    updateFrame();
+});
+
+var oppPlayerMoveDown = new Event("oppPlayerMoveDown");
+window.addEventListener("oppPlayerMoveDown", function () { 
+    move(oppPlayer, "DOWN");
+    updateFrame();
+});
+
+var oppPlayerMoveLeft = new Event("oppPlayerMoveLeft");
+window.addEventListener("oppPlayerMoveLeft", function () { 
+    move(oppPlayer, "LEFT");
+    updateFrame();
+});
+
+var oppPlayerMoveRight = new Event("oppPlayerMoveRight");
+window.addEventListener("oppPlayerMoveRight", function () { 
+    move(oppPlayer, "RIGHT");
+    updateFrame();
+});
+
+var oppPlayerEndTurn = new Event("oppPlayerEndTurn");
+window.addEventListener("oppPlayerEndTurn", function () { 
+    
+});
+
+var oppPlayerVisionPow = new Event("oppPlayerVisionPow");
+window.addEventListener("oppPlayerVisionPow", function () { 
+
+});
+
+var oppPlayerMovePow = new Event("oppPlayerMovePow");
+window.addEventListener("oppPlayerMovePow", function () { 
+
+});
 
 //Draw the canvas
 function drawGame()
@@ -190,6 +209,32 @@ function legalMove(posX, posY)
     return false;
 }
 
+function powerTrigger(player, posX, posY)
+{
+    if (player == currentPlayer)
+    {
+        if (map[((posY*mapWidth)+posX)] == 4)
+        {
+            window.dispatchEvent(thisPlayerMovePow);
+        }
+        else if (map[((posY*mapWidth)+posX)] == 5)
+        {
+            window.dispatchEvent(thisPlayerVisionPow);
+        }
+    }
+    else
+    {
+        if (map[((posY*mapWidth)+posX)] == 4)
+        {
+            window.dispatchEvent(oppPlayerMovePow);
+        }
+        else if (map[((posY*mapWidth)+posX)] == 5)
+        {
+            window.dispatchEvent(oppPlayerVisionPow);
+        }
+    }
+}
+
 //Move in a direction
 function move(player, direction)
 {
@@ -204,6 +249,7 @@ function move(player, direction)
     {
         if (legalMove(targetLocation.x,targetLocation.y-1))
         {
+            powerTrigger(player, targetLocation.x,targetLocation.y-1);
             map[(((targetLocation.y)*mapWidth)+targetLocation.x)] = 0;
             targetLocation.y = targetLocation.y-1;
             map[(((targetLocation.y)*mapWidth)+targetLocation.x)] = player;
@@ -214,6 +260,7 @@ function move(player, direction)
     {
         if (legalMove(targetLocation.x,targetLocation.y+1))
         {
+            powerTrigger(player, targetLocation.x,targetLocation.y+1);
             map[(((targetLocation.y)*mapWidth)+targetLocation.x)] = 0;
             targetLocation.y = targetLocation.y+1;
             map[(((targetLocation.y)*mapWidth)+targetLocation.x)] = player;
@@ -224,6 +271,7 @@ function move(player, direction)
     {
         if (legalMove(targetLocation.x-1,targetLocation.y))
         {
+            powerTrigger(player, targetLocation.x-1,targetLocation.y);
             map[(((targetLocation.y)*mapWidth)+targetLocation.x)] = 0;
             targetLocation.x = targetLocation.x-1;
             map[(((targetLocation.y)*mapWidth)+targetLocation.x)] = player;
@@ -234,6 +282,7 @@ function move(player, direction)
     {
         if (legalMove(targetLocation.x+1,targetLocation.y))
         {
+            powerTrigger(player, targetLocation.x+1,targetLocation.y);
             map[(((targetLocation.y)*mapWidth)+targetLocation.x)] = 0;
             targetLocation.x = targetLocation.x+1;
             map[(((targetLocation.y)*mapWidth)+targetLocation.x)] = player;
@@ -249,25 +298,25 @@ function resetStamina()
 
 function pressUp()
 {
-    callEvent("thisPlayerMoveUp");
+    window.dispatchEvent(thisPlayerMoveUp);
 }
 
 function pressDown()
 {
-    callEvent("thisPlayerMoveDown");
+    window.dispatchEvent(thisPlayerMoveDown);
 }
 
 function pressLeft()
 {
-    callEvent("thisPlayerMoveLeft");
+    window.dispatchEvent(thisPlayerMoveLeft);
 }
 
 function pressRight()
 {
-    callEvent("thisPlayerMoveRight");
+    window.dispatchEvent(thisPlayerMoveRight);
 }
 
 function pressSubmit()
 {
-    callEvent("thisPlayerEndTurn");
+    window.dispatchEvent(thisPlayerEndTurn);
 }
