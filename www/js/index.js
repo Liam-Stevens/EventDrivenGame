@@ -1,4 +1,6 @@
 var canvas = null;
+var header = null;
+var dispStamina = null;
 
 /*
     Map for play
@@ -22,7 +24,7 @@ var map = [
     0, 0, 0, 0, 0, 0, 0, 0, 0, 9,
 ];
 
-var screenHeight = window.innerHeight-window.innerHeight/10;
+var screenHeight = window.innerHeight-window.innerHeight/5;
 var screenWidth = window.screen.width;
 
 //Change this to screenWidth for production
@@ -32,51 +34,84 @@ var mapWidth = 10, mapHeight = 10;
 var tileWidth = display/mapWidth, tileHeight = display/mapHeight;
 
 var currentPlayer = 8;
+var oppPlayer = 9;
 var targetLocation = {x:0,y:0};
+
+var stamina = 6;
+
+var visionPowFavour = 0;
+var visionPowTime = 0;
+var movePowFavour = 0;
+var movePowTime = 0;
 
 //Setup the canvas environment
 window.onload = function()
 {
     canvas = document.getElementById('tag').getContext('2d');
+    header = document.getElementById('header');
+    dispStamina = document.getElementById('staminaNum');
     document.getElementById('tag').setAttribute("height", display);
     document.getElementById('tag').setAttribute("width", display);
-    getLocation(currentPlayer);
-    requestAnimationFrame(drawGame);
+    updateFrame();
 };
 
 function callEvent(event)
 {
-    if (event == "player1MoveUp")
+    if (event == "thisPlayerMoveUp")
     {
-        move(8, "UP");
+        move(currentPlayer, "UP");
     }
-    else if (event == "player1MoveDown")
+    else if (event == "thisPlayerMoveDown")
     {
-        move(8, "DOWN");
+        move(currentPlayer, "DOWN");
     }
-    else if (event == "player1MoveLeft")
+    else if (event == "thisPlayerMoveLeft")
     {
-        move(8, "LEFT");
+        move(currentPlayer, "LEFT");
     }
-    else if (event == "player1MoveRight")
+    else if (event == "thisPlayerMoveRight")
     {
-        move(8, "RIGHT");
+        move(currentPlayer, "RIGHT");
     }
-    else if (event == "player2MoveUp")
+    else if (event == "thisPlayerEndTurn")
     {
-        move(9, "UP");
+
     }
-    else if (event == "player2MoveDown")
+    else if (event == "thisPlayerVisionPow")
     {
-        move(9, "DOWN");
+        
     }
-    else if (event == "player2MoveLeft")
+    else if (event == "thisPlayerMovePow")
     {
-        move(9, "LEFT");
+        
     }
-    else if (event == "player2MoveRight")
+    else if (event == "oppPlayerMoveUp")
     {
-        move(9, "RIGHT");
+        move(oppPlayer, "UP");
+    }
+    else if (event == "oppPlayerMoveDown")
+    {
+        move(oppPlayer, "DOWN");
+    }
+    else if (event == "oppPlayerMoveLeft")
+    {
+        move(oppPlayer, "LEFT");
+    }
+    else if (event == "oppPlayerMoveRight")
+    {
+        move(oppPlayer, "RIGHT");
+    }
+    else if (event == "oppPlayerEndTurn")
+    {
+        
+    }
+    else if (event == "oppPlayerVisionPow")
+    {
+        
+    }
+    else if (event == "oppPlayerMovePow")
+    {
+        
     }
     updateFrame();
 }
@@ -138,6 +173,7 @@ function getLocation(searchTile)
 
 function updateFrame()
 {
+    dispStamina.innerHTML = stamina;
     requestAnimationFrame(drawGame);
 }
 
@@ -157,6 +193,11 @@ function legalMove(posX, posY)
 //Move in a direction
 function move(player, direction)
 {
+    if (stamina <= 0)
+    {
+        return;
+    }
+    
     getLocation(player);
     
     if (direction == "UP")
@@ -166,6 +207,7 @@ function move(player, direction)
             map[(((targetLocation.y)*mapWidth)+targetLocation.x)] = 0;
             targetLocation.y = targetLocation.y-1;
             map[(((targetLocation.y)*mapWidth)+targetLocation.x)] = player;
+            stamina--;
         }
     }
     else if (direction == "DOWN")
@@ -175,6 +217,7 @@ function move(player, direction)
             map[(((targetLocation.y)*mapWidth)+targetLocation.x)] = 0;
             targetLocation.y = targetLocation.y+1;
             map[(((targetLocation.y)*mapWidth)+targetLocation.x)] = player;
+            stamina--;
         }
     }
     else if (direction == "LEFT")
@@ -184,6 +227,7 @@ function move(player, direction)
             map[(((targetLocation.y)*mapWidth)+targetLocation.x)] = 0;
             targetLocation.x = targetLocation.x-1;
             map[(((targetLocation.y)*mapWidth)+targetLocation.x)] = player;
+            stamina--;
         }
     }
     else if (direction == "RIGHT")
@@ -193,32 +237,37 @@ function move(player, direction)
             map[(((targetLocation.y)*mapWidth)+targetLocation.x)] = 0;
             targetLocation.x = targetLocation.x+1;
             map[(((targetLocation.y)*mapWidth)+targetLocation.x)] = player;
+            stamina--;
         }
     }
 }
 
+function resetStamina()
+{
+    stamina = 6;
+}
+
 function pressUp()
 {
-    callEvent("player1MoveUp");
+    callEvent("thisPlayerMoveUp");
 }
 
 function pressDown()
 {
-    callEvent("player1MoveDown");
+    callEvent("thisPlayerMoveDown");
 }
 
 function pressLeft()
 {
-    callEvent("player1MoveLeft");
+    callEvent("thisPlayerMoveLeft");
 }
 
 function pressRight()
 {
-    callEvent("player1MoveRight");
+    callEvent("thisPlayerMoveRight");
 }
 
 function pressSubmit()
 {
-    //TODO: Remove this
-    callEvent("player2MoveUp");
+    callEvent("thisPlayerEndTurn");
 }
