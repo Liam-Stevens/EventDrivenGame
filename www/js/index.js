@@ -32,7 +32,7 @@ var mapWidth = 10, mapHeight = 10;
 var tileWidth = display/mapWidth, tileHeight = display/mapHeight;
 
 var currentPlayer = 8;
-var currentLocation = {x:0,y:0};
+var targetLocation = {x:0,y:0};
 
 //Setup the canvas environment
 window.onload = function()
@@ -40,9 +40,46 @@ window.onload = function()
     canvas = document.getElementById('tag').getContext('2d');
     document.getElementById('tag').setAttribute("height", display);
     document.getElementById('tag').setAttribute("width", display);
-    getLocation();
+    getLocation(currentPlayer);
     requestAnimationFrame(drawGame);
 };
+
+function callEvent(event)
+{
+    if (event == "player1MoveUp")
+    {
+        move(8, "UP");
+    }
+    else if (event == "player1MoveDown")
+    {
+        move(8, "DOWN");
+    }
+    else if (event == "player1MoveLeft")
+    {
+        move(8, "LEFT");
+    }
+    else if (event == "player1MoveRight")
+    {
+        move(8, "RIGHT");
+    }
+    else if (event == "player2MoveUp")
+    {
+        move(9, "UP");
+    }
+    else if (event == "player2MoveDown")
+    {
+        move(9, "DOWN");
+    }
+    else if (event == "player2MoveLeft")
+    {
+        move(9, "LEFT");
+    }
+    else if (event == "player2MoveRight")
+    {
+        move(9, "RIGHT");
+    }
+    updateFrame();
+}
 
 //Draw the canvas
 function drawGame()
@@ -83,17 +120,17 @@ function drawGame()
     }
 }
 
-//Get the location of the current player
-function getLocation()
+//Get the location of the specified
+function getLocation(searchTile)
 {  
     for(var y = 0; y < mapHeight; y++)
     {
         for(var x = 0; x < mapWidth; x++)
         {
-            if (map[((y*mapWidth)+x)] == currentPlayer)
+            if (map[((y*mapWidth)+x)] == searchTile)
             {
-                currentLocation.x = x;
-                currentLocation.y = y;
+                targetLocation.x = x;
+                targetLocation.y = y;
             }
         }
     }
@@ -118,86 +155,70 @@ function legalMove(posX, posY)
 }
 
 //Move in a direction
-function move(direction)
+function move(player, direction)
 {
+    getLocation(player);
+    
     if (direction == "UP")
     {
-        if (legalMove(currentLocation.x,currentLocation.y-1))
+        if (legalMove(targetLocation.x,targetLocation.y-1))
         {
-            map[(((currentLocation.y)*mapWidth)+currentLocation.x)] = 0;
-            currentLocation.y = currentLocation.y-1;
-            map[(((currentLocation.y)*mapWidth)+currentLocation.x)] = currentPlayer;
+            map[(((targetLocation.y)*mapWidth)+targetLocation.x)] = 0;
+            targetLocation.y = targetLocation.y-1;
+            map[(((targetLocation.y)*mapWidth)+targetLocation.x)] = player;
         }
     }
     else if (direction == "DOWN")
     {
-        if (legalMove(currentLocation.x,currentLocation.y+1))
+        if (legalMove(targetLocation.x,targetLocation.y+1))
         {
-            map[(((currentLocation.y)*mapWidth)+currentLocation.x)] = 0;
-            currentLocation.y = currentLocation.y+1;
-            map[(((currentLocation.y)*mapWidth)+currentLocation.x)] = currentPlayer;
+            map[(((targetLocation.y)*mapWidth)+targetLocation.x)] = 0;
+            targetLocation.y = targetLocation.y+1;
+            map[(((targetLocation.y)*mapWidth)+targetLocation.x)] = player;
         }
     }
     else if (direction == "LEFT")
     {
-        if (legalMove(currentLocation.x-1,currentLocation.y))
+        if (legalMove(targetLocation.x-1,targetLocation.y))
         {
-            map[(((currentLocation.y)*mapWidth)+currentLocation.x)] = 0;
-            currentLocation.x = currentLocation.x-1;
-            map[(((currentLocation.y)*mapWidth)+currentLocation.x)] = currentPlayer;
+            map[(((targetLocation.y)*mapWidth)+targetLocation.x)] = 0;
+            targetLocation.x = targetLocation.x-1;
+            map[(((targetLocation.y)*mapWidth)+targetLocation.x)] = player;
         }
     }
     else if (direction == "RIGHT")
     {
-        if (legalMove(currentLocation.x+1,currentLocation.y))
+        if (legalMove(targetLocation.x+1,targetLocation.y))
         {
-            map[(((currentLocation.y)*mapWidth)+currentLocation.x)] = 0;
-            currentLocation.x = currentLocation.x+1;
-            map[(((currentLocation.y)*mapWidth)+currentLocation.x)] = currentPlayer;
+            map[(((targetLocation.y)*mapWidth)+targetLocation.x)] = 0;
+            targetLocation.x = targetLocation.x+1;
+            map[(((targetLocation.y)*mapWidth)+targetLocation.x)] = player;
         }
     }
 }
 
 function pressUp()
 {
-    move("UP");
-    updateFrame();
+    callEvent("player1MoveUp");
 }
 
 function pressDown()
 {
-    move("DOWN");
-    updateFrame();
+    callEvent("player1MoveDown");
 }
 
 function pressLeft()
 {
-    move("LEFT");
-    updateFrame();
+    callEvent("player1MoveLeft");
 }
 
 function pressRight()
 {
-    move("RIGHT");
-    updateFrame();
+    callEvent("player1MoveRight");
 }
 
 function pressSubmit()
 {
     //TODO: Remove this
-    switchPlayer();
-}
-
-//DEBUG function
-function switchPlayer()
-{
-    if (currentPlayer == 8)
-    {
-        currentPlayer = 9;
-    }
-    else
-    {
-        currentPlayer = 8;
-    }
-    getLocation();
+    callEvent("player2MoveUp");
 }
