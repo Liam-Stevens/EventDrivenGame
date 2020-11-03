@@ -13,12 +13,19 @@
         <title>EDC Game</title>
     </head>
     <body style="background-color:#333333 ;margin: 0; padding: 0; border: 0;">
-        <div style="color:white ;padding:2em">
+        <!-- Connection Screen -->
+        <div id="connector" style="color:white; padding:2em; align-content: center; text-align: center;">
+            <p id="refused" style="display: none; color: red;">Lobby is full</p>
             <p>Please Enter a URL</p>
             <input id="url" type="text" style="color:white" />
             <button class="waves-effect waves-light btn-small" onclick="connect(document.querySelector('#url').value);">Connect</button>
         </div>
-        <div id="game" style="visibility: hidden;">
+        <!-- Wait Screen -->
+        <div id="wait" style="display: none; color:white; padding:2em; align-content: center; text-align: center;">
+            <p>Waiting for another Player</p>
+        </div>
+        <!-- Main Game -->
+        <div id="game" style="display: none;">
             <div id="header" class="light-green" style="color: white">
                 <p style="display:inline; padding: 1em">Stamina:</p><b id="staminaNum">N/A</b>
             </div>

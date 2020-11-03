@@ -29,7 +29,7 @@ var screenHeight = window.innerHeight-window.innerHeight/5;
 var screenWidth = window.screen.width;
 
 //Change this to screenWidth for production
-var display = screenHeight;
+var display = screenWidth;
 
 var mapWidth = 10, mapHeight = 10;
 var tileWidth = display/mapWidth, tileHeight = display/mapHeight;
@@ -53,6 +53,8 @@ window.onload = function()
     dispStamina = document.getElementById('staminaNum');
     document.getElementById('tag').setAttribute("height", display);
     document.getElementById('tag').setAttribute("width", display);
+    canvas.fillStyle = "#ffffff";
+    canvas.fillRect(0, 0, display, display);
     updateFrame();
 };
 
@@ -325,14 +327,36 @@ function pressSubmit()
 function connect(url)
 {
     socket = io.connect("http://"+url);
-    rxjs.fromEvent(socket,'data').pipe(rxjs.operators.map(function (data)
+    var inputData = rxjs.fromEvent(socket,'data').pipe(rxjs.operators.map(function (data)
     {
         return JSON.parse(data);
-    })).pipe(rxjs.operators.filter(function (data)
+    }));
+    
+    inputData.pipe(rxjs.operators.filter(function (data)
     {
-        return (data.connected == "true");
+        return (data.connected == "true" || data.connected == "false");
     }))
     .subscribe(function(data) {
-        console.log(data);
+        if (data.connected == "true")
+        {
+            document.getElementById('refused').style.display = "none";
+            document.getElementById('connector').style.display = "none";
+            document.getElementById('wait').style.display = "inline";
+            document.getElementById('game').style.display = "none";
+        }
+        else
+        {
+            document.getElementById('refused').style.display = "inline";
+        }
+    });
+    
+    inputData.pipe(rxjs.operators.filter(function (data)
+    {
+        return (data.ready == "true");
+    }))
+    .subscribe(function() {
+        document.getElementById('connector').style.display = "none";
+        document.getElementById('wait').style.display = "none";
+        document.getElementById('game').style.display = "inline";
     });
 }
