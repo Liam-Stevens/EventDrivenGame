@@ -1,3 +1,4 @@
+var socket = null;
 var canvas = null;
 var header = null;
 var dispStamina = null;
@@ -53,8 +54,6 @@ window.onload = function()
     document.getElementById('tag').setAttribute("height", display);
     document.getElementById('tag').setAttribute("width", display);
     updateFrame();
-    
-    
 };
 
 var thisPlayerMoveUp = new Event("thisPlayerMoveUp");
@@ -83,7 +82,9 @@ window.addEventListener("thisPlayerMoveRight", function () {
 
 var thisPlayerEndTurn = new Event("thisPlayerEndTurn");
 window.addEventListener("thisPlayerEndTurn", function () { 
-    
+    //TODO: implement ending of turns
+    resetStamina();
+    updateFrame();
 });
 
 var thisPlayerVisionPow = new Event("thisPlayerVisionPow");
@@ -319,4 +320,19 @@ function pressRight()
 function pressSubmit()
 {
     window.dispatchEvent(thisPlayerEndTurn);
+}
+
+function connect(url)
+{
+    socket = io.connect("http://"+url);
+    rxjs.fromEvent(socket,'data').pipe(rxjs.operators.map(function (data)
+    {
+        return JSON.parse(data);
+    })).pipe(rxjs.operators.filter(function (data)
+    {
+        return (data.connected == "true");
+    }))
+    .subscribe(function(data) {
+        console.log(data);
+    });
 }

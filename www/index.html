@@ -7,26 +7,34 @@
         <meta name="viewport" content="initial-scale=1, width=device-width, viewport-fit=cover">
         <link type="text/css" rel="stylesheet" href="css/icon.css">
         <link type="text/css" rel="stylesheet" href="css/materialize.min.css"  media="screen,projection"/>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.3.0/socket.io.js"></script>
+        <script src="https://unpkg.com/rxjs/bundles/rxjs.umd.min.js"></script>
         <script src="js/index.js"></script>
         <title>EDC Game</title>
     </head>
     <body style="background-color:#333333 ;margin: 0; padding: 0; border: 0;">
-        <!-- TODO: Add a header with game information -->
-        <div id="header" class="light-green" style="color: white">
-            <p style="display:inline; padding: 1em">Stamina:</p><b id="staminaNum">N/A</b>
+        <div style="color:white ;padding:2em">
+            <p>Please Enter a URL</p>
+            <input id="url" type="text" style="color:white" />
+            <button class="waves-effect waves-light btn-small" onclick="connect(document.querySelector('#url').value);">Connect</button>
         </div>
-        <canvas id="tag" style="margin: 0; padding: 0; border: 0;"></canvas>
-        <br>
-        <div style="align-content: center; text-align: center;">
-            <!-- TODO: color buttons based on player -->
-            <button style="margin: 0.25em" class="waves-effect waves-light btn-small light-blue" onclick="pressUp()"><i class="material-icons">arrow_upward</i></button>
+        <div id="game" style="visibility: hidden;">
+            <div id="header" class="light-green" style="color: white">
+                <p style="display:inline; padding: 1em">Stamina:</p><b id="staminaNum">N/A</b>
+            </div>
+            <canvas id="tag" style="margin: 0; padding: 0; border: 0;"></canvas>
             <br>
-            <button style="margin: 0.25em" class="waves-effect waves-light btn-small light-blue" onclick="pressLeft()"><i class="material-icons">arrow_back</i></button>
-            <button style="margin: 0.25em" class="waves-effect waves-light btn-small light-blue" onclick="pressDown()"><i class="material-icons">arrow_downward</i></button>
-            <button style="margin: 0.25em" class="waves-effect waves-light btn-small light-blue" onclick="pressRight()"><i class="material-icons">arrow_forward</i></button>
-            <!-- TODO: hide the movement buttons after stamina drains-->
-            <br>
-            <button style="margin: 0.25em" class="waves-effect waves-light btn-small light-blue" onclick="pressSubmit()">End Turn<i class="material-icons right">send</i></button>  
-        </div> 
+            <div style="align-content: center; text-align: center;">
+                <!-- TODO: color buttons based on player -->
+                <button style="margin: 0.25em" class="waves-effect waves-light btn-small light-blue" onclick="pressUp()"><i class="material-icons">arrow_upward</i></button>
+                <br>
+                <button style="margin: 0.25em" class="waves-effect waves-light btn-small light-blue" onclick="pressLeft()"><i class="material-icons">arrow_back</i></button>
+                <button style="margin: 0.25em" class="waves-effect waves-light btn-small light-blue" onclick="pressDown()"><i class="material-icons">arrow_downward</i></button>
+                <button style="margin: 0.25em" class="waves-effect waves-light btn-small light-blue" onclick="pressRight()"><i class="material-icons">arrow_forward</i></button>
+                <!-- TODO: hide the movement buttons after stamina drains-->
+                <br>
+                <button style="margin: 0.25em" class="waves-effect waves-light btn-small light-blue" onclick="pressSubmit()">End Turn<i class="material-icons right">send</i></button>  
+            </div> 
+        </div>
     </body>
 </html>

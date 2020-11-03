@@ -25,5 +25,9 @@
       "android",
       "ios"
     ]
+  },
+  "dependencies": {
+    "rxjs": "^6.6.3",
+    "socket.io": "^2.3.0"
   }
 }
