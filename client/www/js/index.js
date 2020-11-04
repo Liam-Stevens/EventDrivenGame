@@ -29,7 +29,7 @@ var screenHeight = window.innerHeight-window.innerHeight/5;
 var screenWidth = window.screen.width;
 
 //Change this to screenWidth for production
-var display = screenWidth;
+var display = screenHeight;
 
 var mapWidth = 10, mapHeight = 10;
 var tileWidth = display/mapWidth, tileHeight = display/mapHeight;
@@ -59,27 +59,39 @@ window.onload = function()
 };
 
 var thisPlayerMoveUp = new Event("thisPlayerMoveUp");
-window.addEventListener("thisPlayerMoveUp", function () { 
-    move(currentPlayer, "UP");
-    updateFrame();
+window.addEventListener("thisPlayerMoveUp", function () {
+    if (move(currentPlayer, "UP"))
+    {
+        socket.emit('data', JSON.stringify({move: "UP"}));
+        updateFrame();
+    }    
 });
 
 var thisPlayerMoveDown = new Event("thisPlayerMoveDown");
 window.addEventListener("thisPlayerMoveDown", function () { 
-    move(currentPlayer, "DOWN");
-    updateFrame();
+    if (move(currentPlayer, "DOWN"))
+    {
+        socket.emit('data', JSON.stringify({move: "DOWN"}));
+        updateFrame();
+    }
 });
 
 var thisPlayerMoveLeft = new Event("thisPlayerMoveLeft");
 window.addEventListener("thisPlayerMoveLeft", function () { 
-    move(currentPlayer, "LEFT");
-    updateFrame();
+    if (move(currentPlayer, "LEFT"))
+    {
+        socket.emit('data', JSON.stringify({move: "LEFT"}));
+        updateFrame();
+    }
 });
 
 var thisPlayerMoveRight = new Event("thisPlayerMoveRight");
 window.addEventListener("thisPlayerMoveRight", function () { 
-    move(currentPlayer, "RIGHT");
-    updateFrame();
+    if (move(currentPlayer, "RIGHT"))
+    {
+        socket.emit('data', JSON.stringify({move: "RIGHT"}));
+        updateFrame();
+    }
 });
 
 var thisPlayerEndTurn = new Event("thisPlayerEndTurn");
@@ -243,7 +255,7 @@ function move(player, direction)
 {
     if (stamina <= 0)
     {
-        return;
+        return false;
     }
     
     getLocation(player);
@@ -257,6 +269,7 @@ function move(player, direction)
             targetLocation.y = targetLocation.y-1;
             map[(((targetLocation.y)*mapWidth)+targetLocation.x)] = player;
             stamina--;
+            return true;
         }
     }
     else if (direction == "DOWN")
@@ -268,6 +281,7 @@ function move(player, direction)
             targetLocation.y = targetLocation.y+1;
             map[(((targetLocation.y)*mapWidth)+targetLocation.x)] = player;
             stamina--;
+            return true;
         }
     }
     else if (direction == "LEFT")
@@ -279,6 +293,7 @@ function move(player, direction)
             targetLocation.x = targetLocation.x-1;
             map[(((targetLocation.y)*mapWidth)+targetLocation.x)] = player;
             stamina--;
+            return true;
         }
     }
     else if (direction == "RIGHT")
@@ -290,8 +305,10 @@ function move(player, direction)
             targetLocation.x = targetLocation.x+1;
             map[(((targetLocation.y)*mapWidth)+targetLocation.x)] = player;
             stamina--;
+            return true;
         }
     }
+    return false;
 }
 
 function resetStamina()
@@ -327,11 +344,13 @@ function pressSubmit()
 function connect(url)
 {
     socket = io.connect("http://"+url);
+    //Remove JSON
     var inputData = rxjs.fromEvent(socket,'data').pipe(rxjs.operators.map(function (data)
     {
         return JSON.parse(data);
     }));
     
+    //Show the waiting screen
     inputData.pipe(rxjs.operators.filter(function (data)
     {
         return (data.connected == "true" || data.connected == "false");
@@ -350,6 +369,7 @@ function connect(url)
         }
     });
     
+    //Show the game screen
     inputData.pipe(rxjs.operators.filter(function (data)
     {
         return (data.ready == "true");
@@ -359,4 +379,50 @@ function connect(url)
         document.getElementById('wait').style.display = "none";
         document.getElementById('game').style.display = "inline";
     });
+    
+    //Player assignment data
+    inputData.pipe(rxjs.operators.filter(function (data)
+    {
+        return (data.player != null);
+    }))
+    .pipe(rxjs.operators.map(function (data)
+    {
+        return data.player + 8;
+    }))
+    .subscribe(function(data) {
+        console.log(data);
+        currentPlayer = data;
+        if (currentPlayer == 9)
+        {
+            oppPlayer = 8;
+        }
+        else if (currentPlayer == 8)
+        {
+            oppPlayer = 9;
+        }
+    });
+    
+    inputData.pipe(rxjs.operators.filter(function (data)
+    {
+        return (data.move != null);
+    }))
+    .subscribe(function(data) {
+        if (data.move == "UP")
+        {
+            window.dispatchEvent(oppPlayerMoveUp);
+        }
+        else if (data.move == "DOWN")
+        {
+            window.dispatchEvent(oppPlayerMoveDown);
+        }
+        else if (data.move == "LEFT")
+        {
+            window.dispatchEvent(oppPlayerMoveLeft);
+        }
+        else if (data.move == "RIGHT")
+        {
+            window.dispatchEvent(oppPlayerMoveRight);
+        }
+    });
+    
 }
