@@ -32,7 +32,7 @@ rxjs.fromEvent(io,'connection')
         {
             var randomNum = Math.round(Math.random());
             connected_players[0].emit('data', JSON.stringify({player: randomNum}))
-            connected_players[1].emit('data', JSON.stringify({player: randomNum-1}))
+            connected_players[1].emit('data', JSON.stringify({player: 1-randomNum}))
             io.emit('data', JSON.stringify({ready: "true"}))
         }
     }

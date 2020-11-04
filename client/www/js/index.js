@@ -253,7 +253,7 @@ function powerTrigger(player, posX, posY)
 //Move in a direction
 function move(player, direction)
 {
-    if (stamina <= 0)
+    if (stamina <= 0 && player == currentPlayer)
     {
         return false;
     }
@@ -268,7 +268,10 @@ function move(player, direction)
             map[(((targetLocation.y)*mapWidth)+targetLocation.x)] = 0;
             targetLocation.y = targetLocation.y-1;
             map[(((targetLocation.y)*mapWidth)+targetLocation.x)] = player;
-            stamina--;
+            if (player == currentPlayer)
+            {
+                stamina--;
+            }
             return true;
         }
     }
@@ -280,7 +283,10 @@ function move(player, direction)
             map[(((targetLocation.y)*mapWidth)+targetLocation.x)] = 0;
             targetLocation.y = targetLocation.y+1;
             map[(((targetLocation.y)*mapWidth)+targetLocation.x)] = player;
-            stamina--;
+            if (player == currentPlayer)
+            {
+                stamina--;
+            }
             return true;
         }
     }
@@ -292,7 +298,10 @@ function move(player, direction)
             map[(((targetLocation.y)*mapWidth)+targetLocation.x)] = 0;
             targetLocation.x = targetLocation.x-1;
             map[(((targetLocation.y)*mapWidth)+targetLocation.x)] = player;
-            stamina--;
+            if (player == currentPlayer)
+            {
+                stamina--;
+            }
             return true;
         }
     }
@@ -304,7 +313,10 @@ function move(player, direction)
             map[(((targetLocation.y)*mapWidth)+targetLocation.x)] = 0;
             targetLocation.x = targetLocation.x+1;
             map[(((targetLocation.y)*mapWidth)+targetLocation.x)] = player;
-            stamina--;
+            if (player == currentPlayer)
+            {
+                stamina--;
+            }
             return true;
         }
     }
