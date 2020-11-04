@@ -25,6 +25,8 @@ var map = [
     0, 0, 0, 0, 0, 0, 0, 0, 0, 9,
 ];
 
+var initialMap = map;
+
 var screenHeight = window.innerHeight-window.innerHeight/5;
 var screenWidth = window.screen.width;
 
@@ -64,6 +66,7 @@ window.addEventListener("thisPlayerMoveUp", function () {
     {
         socket.emit('data', JSON.stringify({move: "UP"}));
         updateFrame();
+        victoryCheck()
     }    
 });
 
@@ -73,6 +76,7 @@ window.addEventListener("thisPlayerMoveDown", function () {
     {
         socket.emit('data', JSON.stringify({move: "DOWN"}));
         updateFrame();
+        victoryCheck()
     }
 });
 
@@ -82,6 +86,7 @@ window.addEventListener("thisPlayerMoveLeft", function () {
     {
         socket.emit('data', JSON.stringify({move: "LEFT"}));
         updateFrame();
+        victoryCheck()
     }
 });
 
@@ -91,6 +96,7 @@ window.addEventListener("thisPlayerMoveRight", function () {
     {
         socket.emit('data', JSON.stringify({move: "RIGHT"}));
         updateFrame();
+        victoryCheck()
     }
 });
 
@@ -121,18 +127,21 @@ var oppPlayerMoveDown = new Event("oppPlayerMoveDown");
 window.addEventListener("oppPlayerMoveDown", function () { 
     move(oppPlayer, "DOWN");
     updateFrame();
+    victoryCheck()
 });
 
 var oppPlayerMoveLeft = new Event("oppPlayerMoveLeft");
 window.addEventListener("oppPlayerMoveLeft", function () { 
     move(oppPlayer, "LEFT");
     updateFrame();
+    victoryCheck()
 });
 
 var oppPlayerMoveRight = new Event("oppPlayerMoveRight");
 window.addEventListener("oppPlayerMoveRight", function () { 
     move(oppPlayer, "RIGHT");
     updateFrame();
+    victoryCheck()
 });
 
 var oppPlayerEndTurn = new Event("oppPlayerEndTurn");
@@ -148,6 +157,139 @@ window.addEventListener("oppPlayerVisionPow", function () {
 var oppPlayerMovePow = new Event("oppPlayerMovePow");
 window.addEventListener("oppPlayerMovePow", function () { 
 
+});
+
+var playerWin = new Event("playerWin");
+window.addEventListener("playerWin", function () { 
+    document.getElementById('connector').style.display = "block";
+    document.getElementById('wait').style.display = "none";
+    document.getElementById('game').style.display = "none";
+    resetGame();
+    document.getElementById('alert').style.display = "inline";
+    document.getElementById('alert').innerHTML = "You Won the Game!";
+});
+
+var playerLose = new Event("playerLose");
+window.addEventListener("playerLose", function () { 
+    document.getElementById('connector').style.display = "block";
+    document.getElementById('wait').style.display = "none";
+    document.getElementById('game').style.display = "none";
+    resetGame();
+    document.getElementById('alert').style.display = "inline";
+    document.getElementById('alert').innerHTML = "You Lost the Game!";
+});
+
+var connect = new Event("connect");
+window.addEventListener("connect", function()
+{
+    //Remove JSON
+    var inputData = rxjs.fromEvent(socket,'data').pipe(rxjs.operators.map(function (data)
+    {
+        return JSON.parse(data);
+    }));
+    
+    //Show the waiting screen
+    inputData.pipe(rxjs.operators.filter(function (data)
+    {
+        return (data.connected == "true" || data.connected == "false");
+    }))
+    .subscribe(function(data) {
+        if (data.connected == "true")
+        {
+            document.getElementById('alert').style.display = "none";
+            document.getElementById('connector').style.display = "none";
+            document.getElementById('wait').style.display = "inline";
+            document.getElementById('game').style.display = "none";
+        }
+        else
+        {
+            document.getElementById('alert').style.display = "inline";
+            document.getElementById('alert').innerHTML = "Lobby is full";
+        }
+    });
+    
+    //Show the game screen
+    inputData.pipe(rxjs.operators.filter(function (data)
+    {
+        return (data.ready == "true");
+    }))
+    .subscribe(function() {
+        document.getElementById('connector').style.display = "none";
+        document.getElementById('wait').style.display = "none";
+        document.getElementById('game').style.display = "inline";
+    });
+    
+    //Player assignment data
+    inputData.pipe(rxjs.operators.filter(function (data)
+    {
+        return (data.player != null);
+    }))
+    .pipe(rxjs.operators.map(function (data)
+    {
+        return data.player + 8;
+    }))
+    .subscribe(function(data) {
+        currentPlayer = data;
+        if (currentPlayer == 9)
+        {
+            oppPlayer = 8;
+            colorButtons("pink");
+        }
+        else if (currentPlayer == 8)
+        {
+            oppPlayer = 9;
+            colorButtons("blue");
+        }
+    });
+    
+    inputData.pipe(rxjs.operators.filter(function (data)
+    {
+        return (data.move != null);
+    }))
+    .subscribe(function(data) {
+        if (data.move == "UP")
+        {
+            window.dispatchEvent(oppPlayerMoveUp);
+        }
+        else if (data.move == "DOWN")
+        {
+            window.dispatchEvent(oppPlayerMoveDown);
+        }
+        else if (data.move == "LEFT")
+        {
+            window.dispatchEvent(oppPlayerMoveLeft);
+        }
+        else if (data.move == "RIGHT")
+        {
+            window.dispatchEvent(oppPlayerMoveRight);
+        }
+    });
+    
+    inputData.pipe(rxjs.operators.filter(function (data)
+    {
+        return (data.victor != null);
+    }))
+    .subscribe(function(data) {
+        if (data.victor == "true")
+        {
+            window.dispatchEvent(playerWin);
+        }
+        else if (data.victor == "false")
+        {
+            window.dispatchEvent(playerLose);
+        }
+    });
+});
+
+
+var disconnect = new Event("disconnect");
+window.addEventListener("disconnect", function () { 
+    socket.disconnect();
+    document.getElementById('alert').style.display = "none";
+    document.getElementById('connector').style.display = "block";
+    document.getElementById('wait').style.display = "none";
+    document.getElementById('game').style.display = "none";
+    resetGame();
 });
 
 //Draw the canvas
@@ -177,7 +319,7 @@ function drawGame()
                     canvas.fillStyle = "#03adfc";
                     break;
                 case 9:
-                    canvas.fillStyle = "#fc0390";
+                    canvas.fillStyle = "#f50057";
                     break;
                 default:
                     canvas.fillStyle = "#000000";
@@ -200,9 +342,11 @@ function getLocation(searchTile)
             {
                 targetLocation.x = x;
                 targetLocation.y = y;
+                return true;
             }
         }
     }
+    return false;
 }
 
 function updateFrame()
@@ -250,6 +394,76 @@ function powerTrigger(player, posX, posY)
     }
 }
 
+function victoryCheck()
+{
+    if (!getLocation(9))
+    {
+        if (currentPlayer == 9)
+        {
+            socket.emit('data',JSON.stringify({victor: "false"}));
+        }
+        else if (oppPlayer == 9)
+        {
+            socket.emit('data',JSON.stringify({victor: "true"}));
+        }        
+    }
+}
+
+function colorButtons(color)
+{
+    var upKey = document.getElementById('upKey');
+    var leftKey = document.getElementById('leftKey');
+    var downKey = document.getElementById('downKey');
+    var rightKey = document.getElementById('rightKey');
+    var endTurnKey = document.getElementById('endTurnKey');
+    
+    upKey.classList.remove("light-blue");
+    upKey.classList.remove("disabled");
+    upKey.classList.remove("pink","accent-3");
+    
+    leftKey.classList.remove("light-blue");
+    leftKey.classList.remove("disabled");
+    leftKey.classList.remove("pink","accent-3");
+    
+    downKey.classList.remove("light-blue");
+    downKey.classList.remove("disabled");
+    downKey.classList.remove("pink","accent-3");
+    
+    rightKey.classList.remove("light-blue");
+    rightKey.classList.remove("disabled");
+    rightKey.classList.remove("pink","accent-3");
+    
+    endTurnKey.classList.remove("light-blue");
+    endTurnKey.classList.remove("disabled");
+    endTurnKey.classList.remove("pink","accent-3");
+    
+    
+    if (color == "grey")
+    {
+        upKey.classList.add("disabled");
+        leftKey.classList.add("disabled");
+        downKey.classList.add("disabled");
+        rightKey.classList.add("disabled");
+        //endTurnKey.classList.add("disabled");
+    }
+    else if (color == "blue")
+    {
+        upKey.classList.add("light-blue");
+        leftKey.classList.add("light-blue");
+        downKey.classList.add("light-blue");
+        rightKey.classList.add("light-blue");
+        endTurnKey.classList.add("light-blue");
+    }
+    else if (color == "pink")
+    {
+        upKey.classList.add("pink","accent-3");
+        leftKey.classList.add("pink","accent-3");
+        downKey.classList.add("pink","accent-3");
+        rightKey.classList.add("pink","accent-3");
+        endTurnKey.classList.add("pink","accent-3");
+    }
+}
+
 //Move in a direction
 function move(player, direction)
 {
@@ -258,7 +472,10 @@ function move(player, direction)
         return false;
     }
     
-    getLocation(player);
+    if (!getLocation(player))
+    {
+        return false;
+    }
     
     if (direction == "UP")
     {
@@ -328,113 +545,28 @@ function resetStamina()
     stamina = 6;
 }
 
-function pressUp()
+function resetGame()
 {
-    window.dispatchEvent(thisPlayerMoveUp);
-}
-
-function pressDown()
-{
-    window.dispatchEvent(thisPlayerMoveDown);
-}
-
-function pressLeft()
-{
-    window.dispatchEvent(thisPlayerMoveLeft);
-}
-
-function pressRight()
-{
-    window.dispatchEvent(thisPlayerMoveRight);
-}
-
-function pressSubmit()
-{
-    window.dispatchEvent(thisPlayerEndTurn);
-}
-
-function connect(url)
-{
-    socket = io.connect("http://"+url);
-    //Remove JSON
-    var inputData = rxjs.fromEvent(socket,'data').pipe(rxjs.operators.map(function (data)
-    {
-        return JSON.parse(data);
-    }));
+    resetStamina();
+    map = initialMap;
+    visionPowFavour = 0;
+    visionPowTime = 0;
+    movePowFavour = 0;
+    movePowTime = 0;
     
-    //Show the waiting screen
-    inputData.pipe(rxjs.operators.filter(function (data)
-    {
-        return (data.connected == "true" || data.connected == "false");
-    }))
-    .subscribe(function(data) {
-        if (data.connected == "true")
-        {
-            document.getElementById('refused').style.display = "none";
-            document.getElementById('connector').style.display = "none";
-            document.getElementById('wait').style.display = "inline";
-            document.getElementById('game').style.display = "none";
-        }
-        else
-        {
-            document.getElementById('refused').style.display = "inline";
-        }
-    });
-    
-    //Show the game screen
-    inputData.pipe(rxjs.operators.filter(function (data)
-    {
-        return (data.ready == "true");
-    }))
-    .subscribe(function() {
-        document.getElementById('connector').style.display = "none";
-        document.getElementById('wait').style.display = "none";
-        document.getElementById('game').style.display = "inline";
-    });
-    
-    //Player assignment data
-    inputData.pipe(rxjs.operators.filter(function (data)
-    {
-        return (data.player != null);
-    }))
-    .pipe(rxjs.operators.map(function (data)
-    {
-        return data.player + 8;
-    }))
-    .subscribe(function(data) {
-        console.log(data);
-        currentPlayer = data;
-        if (currentPlayer == 9)
-        {
-            oppPlayer = 8;
-        }
-        else if (currentPlayer == 8)
-        {
-            oppPlayer = 9;
-        }
-    });
-    
-    inputData.pipe(rxjs.operators.filter(function (data)
-    {
-        return (data.move != null);
-    }))
-    .subscribe(function(data) {
-        if (data.move == "UP")
-        {
-            window.dispatchEvent(oppPlayerMoveUp);
-        }
-        else if (data.move == "DOWN")
-        {
-            window.dispatchEvent(oppPlayerMoveDown);
-        }
-        else if (data.move == "LEFT")
-        {
-            window.dispatchEvent(oppPlayerMoveLeft);
-        }
-        else if (data.move == "RIGHT")
-        {
-            window.dispatchEvent(oppPlayerMoveRight);
-        }
-    });
+    canvas = document.getElementById('tag').getContext('2d');
+    header = document.getElementById('header');
+    dispStamina = document.getElementById('staminaNum');
+    document.getElementById('tag').setAttribute("height", display);
+    document.getElementById('tag').setAttribute("width", display);
+    canvas.fillStyle = "#ffffff";
+    canvas.fillRect(0, 0, display, display);
+    updateFrame();
+}
+
+function connecter(url)
+{
+    socket = io.connect(url);
+    window.dispatchEvent(connect);
     
 }

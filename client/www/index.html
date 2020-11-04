@@ -15,10 +15,10 @@
     <body style="background-color:#333333 ;margin: 0; padding: 0; border: 0;">
         <!-- Connection Screen -->
         <div id="connector" style="color:white; padding:2em; align-content: center; text-align: center;">
-            <p id="refused" style="display: none; color: red;">Lobby is full</p>
+            <p id="alert" style="display: none; color: red;"></p>
             <p>Please Enter a URL</p>
-            <input id="url" type="text" style="color:white" />
-            <button class="waves-effect waves-light btn-small" onclick="connect(document.querySelector('#url').value);">Connect</button>
+            <input id="url" type="text" style="color:white" value="http://"/>
+            <button class="waves-effect waves-light btn-small green darken-2" onclick="connecter(document.querySelector('#url').value);">Connect</button>
         </div>
         <!-- Wait Screen -->
         <div id="wait" style="display: none; color:white; padding:2em; align-content: center; text-align: center;">
@@ -26,21 +26,22 @@
         </div>
         <!-- Main Game -->
         <div id="game" style="display: none;">
-            <div id="header" class="light-green" style="color: white">
-                <p style="display:inline; padding: 1em">Stamina:</p><b id="staminaNum">N/A</b>
+            <div id="header" class="cyan" style="color: white; padding: 0.5em; display: inline-block; width: 100%;">
+                <span>Stamina: </span><b id="staminaNum">N/A</b>
+                <button class="waves-effect waves-light btn-small right red" onclick="window.dispatchEvent(disconnect)">Disconnect</button>
             </div>
             <canvas id="tag" style="margin: 0; padding: 0; border: 0;"></canvas>
             <br>
             <div style="align-content: center; text-align: center;">
                 <!-- TODO: color buttons based on player -->
-                <button style="margin: 0.25em" class="waves-effect waves-light btn-small light-blue" onclick="pressUp()"><i class="material-icons">arrow_upward</i></button>
+                <button id= "upKey" style="margin: 0.25em" class="waves-effect waves-light btn-small disabled" onclick="window.dispatchEvent(thisPlayerMoveUp)"><i class="material-icons">arrow_upward</i></button>
                 <br>
-                <button style="margin: 0.25em" class="waves-effect waves-light btn-small light-blue" onclick="pressLeft()"><i class="material-icons">arrow_back</i></button>
-                <button style="margin: 0.25em" class="waves-effect waves-light btn-small light-blue" onclick="pressDown()"><i class="material-icons">arrow_downward</i></button>
-                <button style="margin: 0.25em" class="waves-effect waves-light btn-small light-blue" onclick="pressRight()"><i class="material-icons">arrow_forward</i></button>
+                <button id= "leftKey" style="margin: 0.25em" class="waves-effect waves-light btn-small disabled" onclick="window.dispatchEvent(thisPlayerMoveLeft)"><i class="material-icons">arrow_back</i></button>
+                <button id= "downKey" style="margin: 0.25em" class="waves-effect waves-light btn-small disabled" onclick="window.dispatchEvent(thisPlayerMoveDown)"><i class="material-icons">arrow_downward</i></button>
+                <button id= "rightKey" style="margin: 0.25em" class="waves-effect waves-light btn-small disabled" onclick="window.dispatchEvent(thisPlayerMoveRight)"><i class="material-icons">arrow_forward</i></button>
                 <!-- TODO: hide the movement buttons after stamina drains-->
                 <br>
-                <button style="margin: 0.25em" class="waves-effect waves-light btn-small light-blue" onclick="pressSubmit()">End Turn<i class="material-icons right">send</i></button>  
+                <button id= "endTurnKey" style="margin: 0.25em" class="waves-effect waves-light btn-small disabled" onclick="window.dispatchEvent(thisPlayerEndTurn)">End Turn<i class="material-icons right">send</i></button>  
             </div> 
         </div>
     </body>
