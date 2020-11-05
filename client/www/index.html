@@ -30,8 +30,7 @@
         <div id="game" style="display: none;">
             <div id="header" class="cyan" style="color: white; padding: 0.5em; display: inline-block; width: 100%;">
                 <button class="btn-small teal darken-4">Stamina: <b id="staminaNum">N/A</b></button>
-                <button id="visionPowDisplay" class="btn-small green accent-4" style="display:none">YOU ARE AFFECTED BY ENLIGHTEN</button>
-                <button id="movePowDisplay" class="btn-small amber accent-4" style="display:none">YOU ARE AFFECTED BY HASTE</button>
+                <button class="btn-small pink accent-3">Time: <b id="timer">N/A</b></button>
                 <button class="waves-effect waves-light btn-small right red" onclick="window.dispatchEvent(disconnect)">Disconnect</button>
             </div>
             <canvas id="tag" style="margin: 0; padding: 0; border: 0;"></canvas>
@@ -43,7 +42,18 @@
                 <button id= "downKey" style="margin: 0.25em" class="waves-effect waves-light btn-small disabled" onclick="window.dispatchEvent(thisPlayerMoveDown)"><i class="material-icons">arrow_downward</i></button>
                 <button id= "rightKey" style="margin: 0.25em" class="waves-effect waves-light btn-small disabled" onclick="window.dispatchEvent(thisPlayerMoveRight)"><i class="material-icons">arrow_forward</i></button>
                 <br>
-                <button id= "endTurnKey" style="margin: 0.25em" class="waves-effect waves-light btn-small disabled" onclick="window.dispatchEvent(thisPlayerEndTurn)">End Turn<i class="material-icons right">send</i></button>  
+                <button id= "endTurnKey" style="margin: 0.25em" class="waves-effect waves-light btn-small disabled" onclick="window.dispatchEvent(thisPlayerEndTurn)">End Turn<i class="material-icons right">send</i></button>
+                <br>
+                <br>
+                <div style="align-content: center; text-align: center;">
+                    <button class="btn-small blue-grey" style="margin:0.25em">Turn: <b id="turnNum">N/A</b></button>
+                    <br>
+                    <button class="btn-small cyan" style="margin:0.25em">Status Effects</button>
+                    <br>
+                    <button id="visionPowDisplay" class="btn-small green accent-4" style="display:none; margin:0.25em"></button>
+                    <br>
+                    <button id="movePowDisplay" class="btn-small amber accent-4" style="display:none; margin:0.25em"></button>  
+                </div>
             </div> 
         </div>
     </body>

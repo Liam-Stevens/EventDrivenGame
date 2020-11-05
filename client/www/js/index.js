@@ -51,6 +51,10 @@ var revealAll = false;
 var movePowFavour = 0;
 var movePowTime = 0;
 
+var timer = 20;
+var timerInterval = null;
+var turn = 1;
+
 //Setup the canvas environment
 window.onload = function()
 {
@@ -61,6 +65,7 @@ window.onload = function()
     document.getElementById('tag').setAttribute("width", display);
     canvas.fillStyle = "#ffffff";
     canvas.fillRect(0, 0, display, display);
+    document.getElementById('turnNum').innerHTML = turn;
     updateFrame();
 };
 
@@ -127,6 +132,9 @@ window.addEventListener("thisPlayerMoveRight", function () {
 //This client pressed End Turn button
 var thisPlayerEndTurn = new Event("thisPlayerEndTurn");
 window.addEventListener("thisPlayerEndTurn", function () { 
+    clearInterval(timerInterval);
+    timer = 20;
+    document.getElementById('timer').innerHTML = timer;
     colorButtons("grey");
     endTurnKey.classList.add("disabled");
     socket.emit('data', JSON.stringify({turn: "end"}));
@@ -194,6 +202,9 @@ window.addEventListener("oppPlayerEndTurn", function () {
     {
         colorButtons("pink");
     }
+    turn++;
+    document.getElementById('turnNum').innerHTML = turn;
+    window.dispatchEvent(startTimer);
 });
 
 //Opponent client collected the green power up (5)
@@ -232,6 +243,12 @@ window.addEventListener("playerLose", function () {
     resetGame();
     document.getElementById('alert').style.display = "inline";
     document.getElementById('alert').innerHTML = "You Lost the Game!";
+});
+
+var startTimer = new Event("startTimer");
+window.addEventListener("startTimer", function () { 
+    timer = 20;
+    timerInterval = setInterval(countDown, 1000);
 });
 
 //Connect to the server
@@ -274,6 +291,7 @@ window.addEventListener("connect", function()
         document.getElementById('connector').style.display = "none";
         document.getElementById('wait').style.display = "none";
         document.getElementById('game').style.display = "block";
+        window.dispatchEvent(startTimer);
     });
     
     //Player assignment data
@@ -337,6 +355,19 @@ window.addEventListener("connect", function()
         else if (data.victor == "false")
         {
             window.dispatchEvent(playerLose);
+        }
+        else if (data.victor == "time")
+        {
+            if (currentPlayer == 8)
+            {
+                socket.emit('data', JSON.stringify({victor: "false"}));
+                window.dispatchEvent(playerLose);
+            }
+            else if (currentPlayer == 9)
+            {
+                socket.emit('data', JSON.stringify({victor: "true"}));
+                window.dispatchEvent(playerWin);
+            }
         }
     });
     
@@ -663,6 +694,11 @@ function resetGame()
     movePowFavour = 0;
     movePowTime = 0;
     maxStamina = 6
+    clearInterval(timerInterval);
+    timer = 20;
+    document.getElementById('timer').innerHTML = timer;
+    turn = 1;
+    document.getElementById('turnNum').innerHTML = turn;
     
     canvas = document.getElementById('tag').getContext('2d');
     header = document.getElementById('header');
@@ -820,5 +856,19 @@ function recursiveFog(x, y, depth)
 function connecter(url)
 {
     socket = io.connect(url);
+    document.getElementById('timer').innerHTML = timer;
     window.dispatchEvent(connect);
+}
+
+function countDown()
+{
+    if (timer > 0)
+    {
+        timer--;
+        document.getElementById('timer').innerHTML = timer;
+    }
+    else if (timer == 0)
+    {
+        window.dispatchEvent(thisPlayerEndTurn);
+    }
 }

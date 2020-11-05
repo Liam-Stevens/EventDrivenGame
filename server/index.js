@@ -14,6 +14,7 @@ rxjs.operators = require('rxjs/operators');
 let connected_players = [];
 var bootLock = false;
 var endTurns = 0;
+var turns = 0;
 
 rxjs.fromEvent(io,'connection')
 .subscribe(function(client) {
@@ -36,6 +37,7 @@ rxjs.fromEvent(io,'connection')
             connected_players[0].emit('data', JSON.stringify({player: randomNum}))
             connected_players[1].emit('data', JSON.stringify({player: 1-randomNum}))
             io.emit('data', JSON.stringify({ready: "true"}))
+            turns = 0;
         }
     }
     
@@ -130,7 +132,13 @@ rxjs.fromEvent(io,'connection')
             {
                 setTimeout(() => {  io.emit('data', JSON.stringify({turn: "reset"})); }, 200);
                 endTurns = 0;
-                console.log("NEXT TURN");
+                turns++;
+                console.log("Turn " + turns + " Ended");
+                if (turns >= 20)
+                {
+                    setTimeout(() => {  io.emit('data', JSON.stringify({victor: "time"})); }, 200);
+                    turns = 0;
+                }
             }
         }
     });
