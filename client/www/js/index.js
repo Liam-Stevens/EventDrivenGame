@@ -41,6 +41,7 @@ var oppPlayer = 9;
 var targetLocation = {x:0,y:0};
 
 var stamina = 6;
+var maxStamina = 6;
 
 var visionPowFavour = 0;
 var visionPowTime = 0;
@@ -131,13 +132,19 @@ window.addEventListener("thisPlayerEndTurn", function () {
 //This client collected the green power up (5)
 var thisPlayerVisionPow = new Event("thisPlayerVisionPow");
 window.addEventListener("thisPlayerVisionPow", function () { 
-
+    visionPowFavour = 1;
+    visionPowTime = 4;
+    document.getElementById('visionPowDisplay').style.display = "inline";
+    document.getElementById('visionPowDisplay').innerHTML = "YOU WILL BE AFFECTED BY ENLIGHTEN";
 });
 
 //This client collected the yellow power up (4)
 var thisPlayerMovePow = new Event("thisPlayerMovePow");
 window.addEventListener("thisPlayerMovePow", function () { 
-
+    movePowFavour = 1;
+    movePowTime = 4;
+    document.getElementById('movePowDisplay').style.display = "inline";
+    document.getElementById('movePowDisplay').innerHTML = "YOU WILL BE AFFECTED BY HASTE";
 });
 
 //Opponent client moved Up
@@ -174,6 +181,7 @@ window.addEventListener("oppPlayerMoveRight", function () {
 //Opposing player has ended their turn
 var oppPlayerEndTurn = new Event("oppPlayerEndTurn");
 window.addEventListener("oppPlayerEndTurn", function () { 
+    updatePowerups();
     resetStamina();
     if (currentPlayer == 8)
     {
@@ -188,13 +196,15 @@ window.addEventListener("oppPlayerEndTurn", function () {
 //Opponent client collected the green power up (5)
 var oppPlayerVisionPow = new Event("oppPlayerVisionPow");
 window.addEventListener("oppPlayerVisionPow", function () { 
-
+    visionPowFavour = -1;
+    visionPowTime = 4;
 });
 
 //Opponent client collected the yellow power up (4)
 var oppPlayerMovePow = new Event("oppPlayerMovePow");
 window.addEventListener("oppPlayerMovePow", function () { 
-
+    movePowFavour = -1;
+    movePowTime = 4;
 });
 
 //This player wins
@@ -368,10 +378,10 @@ function drawGame()
                     canvas.fillStyle = "#444444";
                     break;
                 case 4:
-                    canvas.fillStyle = "#f6fa00";
+                    canvas.fillStyle = "#ffab00";
                     break;
                 case 5:
-                    canvas.fillStyle = "#1fcc44";
+                    canvas.fillStyle = "#00c853";
                     break;
                 case 8:
                     canvas.fillStyle = "#03adfc";
@@ -613,19 +623,20 @@ function move(player, direction)
 //Reset the stamina count
 function resetStamina()
 {
-    stamina = 6;
+    stamina = maxStamina;
     updateFrame();
 }
 
 //Restore game variables to initial state
 function resetGame()
 {
-    resetStamina();
+    
     map = initialMap.map((x) => x);;
     visionPowFavour = 0;
     visionPowTime = 0;
     movePowFavour = 0;
     movePowTime = 0;
+    maxStamina = 6
     
     canvas = document.getElementById('tag').getContext('2d');
     header = document.getElementById('header');
@@ -634,7 +645,107 @@ function resetGame()
     document.getElementById('tag').setAttribute("width", display);
     canvas.fillStyle = "#ffffff";
     canvas.fillRect(0, 0, display, display);
+    document.getElementById('visionPowDisplay').style.display = "none";
+    document.getElementById('visionPowDisplay').innerHTML = "";
+    document.getElementById('movePowDisplay').style.display = "none";
+    document.getElementById('movePowDisplay').innerHTML = "";
+    resetStamina();
     updateFrame();
+}
+
+function updatePowerups()
+{
+    //Vision Powerup
+    if (visionPowFavour != 0)
+    {
+        visionPowTime--;
+        //End the powerup
+        if (visionPowTime == 0)
+        {
+            visionPowFavour = 0;
+            document.getElementById('visionPowDisplay').style.display = "none";
+            document.getElementById('visionPowDisplay').innerHTML = "";
+        }
+        
+        //This client's favour
+        if (visionPowFavour == 1)
+        {
+            if (currentPlayer == 9)
+            {
+                //TODO: IMPLEMENT THIS
+                document.getElementById('visionPowDisplay').style.display = "inline";
+                document.getElementById('visionPowDisplay').innerHTML = "YOU ARE AFFECTED BY ENLIGHTEN";
+            }
+            else
+            {
+                document.getElementById('visionPowDisplay').style.display = "inline";
+                document.getElementById('visionPowDisplay').innerHTML = "THE OPPONENT IS AFFECTED BY BLINDNESS";
+            }
+            
+        }
+        //Opponent's favour
+        else if (visionPowFavour == -1)
+        {
+            if (currentPlayer == 9)
+            {
+                //TODO: IMPLEMENT THIS
+                document.getElementById('visionPowDisplay').style.display = "inline";
+                document.getElementById('visionPowDisplay').innerHTML = "YOU ARE AFFECTED BY BLINDNESS";
+            }
+            else
+            {
+                document.getElementById('visionPowDisplay').style.display = "inline";
+                document.getElementById('visionPowDisplay').innerHTML = "THE OPPONENT IS AFFECTED BY ENLIGHTEN";
+            }           
+        }
+    }
+    
+    //Movement Powerup
+    if (movePowFavour != 0)
+    {
+        movePowTime--;
+        //End the powerup
+        if (movePowTime == 0)
+        {
+            movePowFavour = 0;
+            maxStamina = 6;
+            document.getElementById('movePowDisplay').style.display = "none";
+            document.getElementById('movePowDisplay').innerHTML = "";
+        }
+        
+        //This client's favour
+        if (movePowFavour == 1)
+        {
+            if (currentPlayer == 8)
+            {
+                maxStamina = 8;
+                document.getElementById('movePowDisplay').style.display = "inline";
+                document.getElementById('movePowDisplay').innerHTML = "YOU ARE AFFECTED BY HASTE";
+            }
+            else
+            {
+                document.getElementById('movePowDisplay').style.display = "inline";
+                document.getElementById('movePowDisplay').innerHTML = "THE OPPONENT IS AFFECTED BY FATIGUE";
+            }
+            
+        }
+        //Opponent's favour
+        else if (movePowFavour == -1)
+        {
+            if (currentPlayer == 8)
+            {
+                maxStamina = 4;
+                document.getElementById('movePowDisplay').style.display = "inline";
+                document.getElementById('movePowDisplay').innerHTML = "YOU ARE AFFECTED BY FATIGUE";
+            }
+            else
+            {
+                document.getElementById('movePowDisplay').style.display = "inline";
+                document.getElementById('movePowDisplay').innerHTML = "THE OPPONENT IS AFFECTED BY HASTE";
+            }
+            
+        }
+    }
 }
 
 //Sets url and calls connect event
