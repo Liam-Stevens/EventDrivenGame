@@ -25,7 +25,7 @@ var map = [
     0, 0, 0, 0, 0, 0, 0, 0, 0, 9,
 ];
 
-var initialMap = map;
+var initialMap = map.map((x) => x);;
 
 var screenHeight = window.innerHeight-window.innerHeight/5;
 var screenWidth = window.screen.width;
@@ -60,69 +60,94 @@ window.onload = function()
     updateFrame();
 };
 
+//This client pressed Up button
 var thisPlayerMoveUp = new Event("thisPlayerMoveUp");
 window.addEventListener("thisPlayerMoveUp", function () {
     if (move(currentPlayer, "UP"))
     {
         socket.emit('data', JSON.stringify({move: "UP"}));
+        if (stamina <= 0)
+        {
+            colorButtons("grey");
+        }
         updateFrame();
-        victoryCheck()
+        victoryCheck();
     }    
 });
 
+//This client pressed Down button
 var thisPlayerMoveDown = new Event("thisPlayerMoveDown");
 window.addEventListener("thisPlayerMoveDown", function () { 
     if (move(currentPlayer, "DOWN"))
     {
         socket.emit('data', JSON.stringify({move: "DOWN"}));
+        if (stamina <= 0)
+        {
+            colorButtons("grey");
+        }
         updateFrame();
         victoryCheck()
     }
 });
 
+//This client pressed Left button
 var thisPlayerMoveLeft = new Event("thisPlayerMoveLeft");
 window.addEventListener("thisPlayerMoveLeft", function () { 
     if (move(currentPlayer, "LEFT"))
     {
         socket.emit('data', JSON.stringify({move: "LEFT"}));
+        if (stamina <= 0)
+        {
+            colorButtons("grey");
+        }
         updateFrame();
         victoryCheck()
     }
 });
 
+//This client pressed Right button
 var thisPlayerMoveRight = new Event("thisPlayerMoveRight");
 window.addEventListener("thisPlayerMoveRight", function () { 
     if (move(currentPlayer, "RIGHT"))
     {
         socket.emit('data', JSON.stringify({move: "RIGHT"}));
+        if (stamina <= 0)
+        {
+            colorButtons("grey");
+        }
         updateFrame();
         victoryCheck()
     }
 });
 
+//This client pressed End Turn button
 var thisPlayerEndTurn = new Event("thisPlayerEndTurn");
 window.addEventListener("thisPlayerEndTurn", function () { 
-    //TODO: implement ending of turns
-    resetStamina();
-    updateFrame();
+    colorButtons("grey");
+    endTurnKey.classList.add("disabled");
+    socket.emit('data', JSON.stringify({turn: "end"}));
 });
 
+//This client collected the green power up (5)
 var thisPlayerVisionPow = new Event("thisPlayerVisionPow");
 window.addEventListener("thisPlayerVisionPow", function () { 
 
 });
 
+//This client collected the yellow power up (4)
 var thisPlayerMovePow = new Event("thisPlayerMovePow");
 window.addEventListener("thisPlayerMovePow", function () { 
 
 });
 
+//Opponent client moved Up
 var oppPlayerMoveUp = new Event("oppPlayerMoveUp");
 window.addEventListener("oppPlayerMoveUp", function () { 
     move(oppPlayer, "UP");
     updateFrame();
 });
 
+//Opponent client moved Down
 var oppPlayerMoveDown = new Event("oppPlayerMoveDown");
 window.addEventListener("oppPlayerMoveDown", function () { 
     move(oppPlayer, "DOWN");
@@ -130,6 +155,7 @@ window.addEventListener("oppPlayerMoveDown", function () {
     victoryCheck()
 });
 
+//Opponent client moved Left
 var oppPlayerMoveLeft = new Event("oppPlayerMoveLeft");
 window.addEventListener("oppPlayerMoveLeft", function () { 
     move(oppPlayer, "LEFT");
@@ -137,6 +163,7 @@ window.addEventListener("oppPlayerMoveLeft", function () {
     victoryCheck()
 });
 
+//Opponent client moved Right
 var oppPlayerMoveRight = new Event("oppPlayerMoveRight");
 window.addEventListener("oppPlayerMoveRight", function () { 
     move(oppPlayer, "RIGHT");
@@ -144,41 +171,57 @@ window.addEventListener("oppPlayerMoveRight", function () {
     victoryCheck()
 });
 
+//Opposing player has ended their turn
 var oppPlayerEndTurn = new Event("oppPlayerEndTurn");
 window.addEventListener("oppPlayerEndTurn", function () { 
-    
+    resetStamina();
+    if (currentPlayer == 8)
+    {
+        colorButtons("blue");
+    }
+    else if (currentPlayer == 9)
+    {
+        colorButtons("pink");
+    }
 });
 
+//Opponent client collected the green power up (5)
 var oppPlayerVisionPow = new Event("oppPlayerVisionPow");
 window.addEventListener("oppPlayerVisionPow", function () { 
 
 });
 
+//Opponent client collected the yellow power up (4)
 var oppPlayerMovePow = new Event("oppPlayerMovePow");
 window.addEventListener("oppPlayerMovePow", function () { 
 
 });
 
+//This player wins
 var playerWin = new Event("playerWin");
 window.addEventListener("playerWin", function () { 
     document.getElementById('connector').style.display = "block";
     document.getElementById('wait').style.display = "none";
     document.getElementById('game').style.display = "none";
+    console.log("WIN");
     resetGame();
     document.getElementById('alert').style.display = "inline";
     document.getElementById('alert').innerHTML = "You Won the Game!";
 });
 
+//This player loses
 var playerLose = new Event("playerLose");
 window.addEventListener("playerLose", function () { 
     document.getElementById('connector').style.display = "block";
     document.getElementById('wait').style.display = "none";
     document.getElementById('game').style.display = "none";
+    console.log("LOSE");
     resetGame();
     document.getElementById('alert').style.display = "inline";
     document.getElementById('alert').innerHTML = "You Lost the Game!";
 });
 
+//Connect to the server
 var connect = new Event("connect");
 window.addEventListener("connect", function()
 {
@@ -198,8 +241,9 @@ window.addEventListener("connect", function()
         {
             document.getElementById('alert').style.display = "none";
             document.getElementById('connector').style.display = "none";
-            document.getElementById('wait').style.display = "inline";
+            document.getElementById('wait').style.display = "block";
             document.getElementById('game').style.display = "none";
+            resetGame();
         }
         else
         {
@@ -216,7 +260,7 @@ window.addEventListener("connect", function()
     .subscribe(function() {
         document.getElementById('connector').style.display = "none";
         document.getElementById('wait').style.display = "none";
-        document.getElementById('game').style.display = "inline";
+        document.getElementById('game').style.display = "block";
     });
     
     //Player assignment data
@@ -242,6 +286,7 @@ window.addEventListener("connect", function()
         }
     });
     
+    //Get opponent's move data
     inputData.pipe(rxjs.operators.filter(function (data)
     {
         return (data.move != null);
@@ -265,6 +310,7 @@ window.addEventListener("connect", function()
         }
     });
     
+    //Get victory data
     inputData.pipe(rxjs.operators.filter(function (data)
     {
         return (data.victor != null);
@@ -279,9 +325,21 @@ window.addEventListener("connect", function()
             window.dispatchEvent(playerLose);
         }
     });
+    
+    //End of turn data
+    inputData.pipe(rxjs.operators.filter(function (data)
+    {
+        return (data.turn != null);
+    }))
+    .subscribe(function(data) {
+        if (data.turn == "reset")
+        {
+            window.dispatchEvent(oppPlayerEndTurn);
+        }
+    });
 });
 
-
+//Disconnect from the server
 var disconnect = new Event("disconnect");
 window.addEventListener("disconnect", function () { 
     socket.disconnect();
@@ -349,6 +407,7 @@ function getLocation(searchTile)
     return false;
 }
 
+//Update the canvas
 function updateFrame()
 {
     dispStamina.innerHTML = stamina;
@@ -368,6 +427,7 @@ function legalMove(posX, posY)
     return false;
 }
 
+//Trigger the powerup for the player at the location
 function powerTrigger(player, posX, posY)
 {
     if (player == currentPlayer)
@@ -394,6 +454,7 @@ function powerTrigger(player, posX, posY)
     }
 }
 
+//Check victory conditions
 function victoryCheck()
 {
     if (!getLocation(9))
@@ -407,8 +468,16 @@ function victoryCheck()
             socket.emit('data',JSON.stringify({victor: "true"}));
         }        
     }
+    else if (!getLocation(8))
+    {
+        getLocation(9);
+        map[(((targetLocation.y)*mapWidth)+targetLocation.x)] = 8;
+        updateFrame();
+        victoryCheck();
+    }
 }
 
+//Change the color of movement buttons
 function colorButtons(color)
 {
     var upKey = document.getElementById('upKey');
@@ -433,10 +502,12 @@ function colorButtons(color)
     rightKey.classList.remove("disabled");
     rightKey.classList.remove("pink","accent-3");
     
-    endTurnKey.classList.remove("light-blue");
-    endTurnKey.classList.remove("disabled");
-    endTurnKey.classList.remove("pink","accent-3");
-    
+    if (color != "grey")
+    {
+        endTurnKey.classList.remove("light-blue");
+        endTurnKey.classList.remove("disabled");
+        endTurnKey.classList.remove("pink","accent-3");
+    }
     
     if (color == "grey")
     {
@@ -444,7 +515,6 @@ function colorButtons(color)
         leftKey.classList.add("disabled");
         downKey.classList.add("disabled");
         rightKey.classList.add("disabled");
-        //endTurnKey.classList.add("disabled");
     }
     else if (color == "blue")
     {
@@ -540,15 +610,18 @@ function move(player, direction)
     return false;
 }
 
+//Reset the stamina count
 function resetStamina()
 {
     stamina = 6;
+    updateFrame();
 }
 
+//Restore game variables to initial state
 function resetGame()
 {
     resetStamina();
-    map = initialMap;
+    map = initialMap.map((x) => x);;
     visionPowFavour = 0;
     visionPowTime = 0;
     movePowFavour = 0;
@@ -564,9 +637,9 @@ function resetGame()
     updateFrame();
 }
 
+//Sets url and calls connect event
 function connecter(url)
 {
     socket = io.connect(url);
     window.dispatchEvent(connect);
-    
 }

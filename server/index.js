@@ -13,6 +13,7 @@ rxjs.operators = require('rxjs/operators');
 
 let connected_players = [];
 var bootLock = false;
+var endTurns = 0;
 
 rxjs.fromEvent(io,'connection')
 .subscribe(function(client) {
@@ -78,6 +79,7 @@ rxjs.fromEvent(io,'connection')
         }
     });
     
+    //Recieve victory data
     input.pipe(rxjs.operators.filter(function(data)
     {
         return (data.victor != null)
@@ -111,6 +113,25 @@ rxjs.fromEvent(io,'connection')
             }
             bootLock = false;
             
+        }
+    });
+    
+    //End turn data
+    input.pipe(rxjs.operators.filter(function(data)
+    {
+        return (data.turn != null)
+    }))
+    .subscribe(function(data) {
+        if (data.turn == "end")
+        {
+            console.log("Player " + (connected_players.indexOf(client)+1) + ": TURN ENDED");
+            endTurns++;
+            if (endTurns >= 2)
+            {
+                setTimeout(() => {  io.emit('data', JSON.stringify({turn: "reset"})); }, 200);
+                endTurns = 0;
+                console.log("NEXT TURN");
+            }
         }
     });
 });
