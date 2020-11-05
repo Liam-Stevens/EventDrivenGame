@@ -32,7 +32,7 @@ var screenHeight = window.innerHeight-window.innerHeight/5;
 var screenWidth = window.screen.width;
 
 //Change this to screenWidth for production
-var display = screenHeight;
+var display = screenWidth;
 
 var mapWidth = 10, mapHeight = 10;
 var tileWidth = display/mapWidth, tileHeight = display/mapHeight;
@@ -248,6 +248,10 @@ window.addEventListener("playerLose", function () {
 var startTimer = new Event("startTimer");
 window.addEventListener("startTimer", function () { 
     timer = 20;
+    if (timerInterval != null)
+    {
+        clearInterval(timerInterval);
+    }
     timerInterval = setInterval(countDown, 1000);
 });
 
