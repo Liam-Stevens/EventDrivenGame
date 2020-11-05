@@ -25,7 +25,8 @@ var map = [
     0, 0, 0, 0, 0, 0, 0, 0, 0, 9,
 ];
 
-var initialMap = map.map((x) => x);;
+var initialMap = map.map((x) => x);
+var fogMask = null;
 
 var screenHeight = window.innerHeight-window.innerHeight/5;
 var screenWidth = window.screen.width;
@@ -45,6 +46,7 @@ var maxStamina = 6;
 
 var visionPowFavour = 0;
 var visionPowTime = 0;
+var visionRange = 5;
 var movePowFavour = 0;
 var movePowTime = 0;
 
@@ -294,6 +296,7 @@ window.addEventListener("connect", function()
             oppPlayer = 9;
             colorButtons("blue");
         }
+        updateFrame();
     });
     
     //Get opponent's move data
@@ -369,30 +372,49 @@ function drawGame()
     {
         for(var x = 0; x < mapWidth; x++)
         {
-            switch(map[((y*mapWidth)+x)])
+            if (fogmask[((y*mapWidth)+x)] != 1)
             {
-                case 0:
-                    canvas.fillStyle = "#ffffff";
-                    break;
-                case 1:
-                    canvas.fillStyle = "#444444";
-                    break;
-                case 4:
-                    canvas.fillStyle = "#ffab00";
-                    break;
-                case 5:
-                    canvas.fillStyle = "#00c853";
-                    break;
-                case 8:
-                    canvas.fillStyle = "#03adfc";
-                    break;
-                case 9:
-                    canvas.fillStyle = "#f50057";
-                    break;
-                default:
-                    canvas.fillStyle = "#000000";
-                    break;                    
+                switch(map[((y*mapWidth)+x)])
+                {
+                    case 0:
+                        canvas.fillStyle = "#ffffff";
+                        break;
+                    case 1:
+                        canvas.fillStyle = "#444444";
+                        break;
+                    case 4:
+                        canvas.fillStyle = "#ffab00";
+                        break;
+                    case 5:
+                        canvas.fillStyle = "#00c853";
+                        break;
+                    case 8:
+                        canvas.fillStyle = "#03adfc";
+                        break;
+                    case 9:
+                        canvas.fillStyle = "#f50057";
+                        break;
+                    default:
+                        canvas.fillStyle = "#000000";
+                        break;                    
+                }
             }
+            else
+            {
+                switch(map[((y*mapWidth)+x)])
+                {
+                    case 0:
+                        canvas.fillStyle = "#aaaaaa";
+                        break;
+                    case 1:
+                        canvas.fillStyle = "#444444";
+                        break;
+                    default:
+                        canvas.fillStyle = "#aaaaaa";
+                        break;                    
+                }
+            }
+            
             
             canvas.fillRect(x*tileWidth, y*tileHeight, tileWidth, tileHeight);
         }
@@ -421,6 +443,7 @@ function getLocation(searchTile)
 function updateFrame()
 {
     dispStamina.innerHTML = stamina;
+    createFog();
     requestAnimationFrame(drawGame);
 }
 
@@ -746,6 +769,42 @@ function updatePowerups()
             
         }
     }
+}
+
+function createFog()
+{
+    fogmask = new Array(mapHeight*mapWidth).fill(1);
+    getLocation(currentPlayer);
+    //console.log(fogmask);
+    recursiveFog(targetLocation.x,targetLocation.y,visionRange);
+}
+
+function recursiveFog(x, y, depth)
+{
+    //console.log("X: " + x + " Y: " + y + " D: " + depth)
+    if (depth <= 0 || y < 0 || y >= mapHeight || x < 0 || x >= mapWidth)
+    {
+        return;
+    }
+    
+    if (fogmask[((y*mapWidth)+x)] == 0)
+    {
+        //return;
+    }
+    else if (map[((y*mapWidth)+x)] != 1)
+    {
+        //console.log("MARKED ");
+        fogmask[((y*mapWidth)+x)] = 0;
+    }
+    else
+    {
+        return;
+    }
+    
+    recursiveFog(x+1,y,depth-1);
+    recursiveFog(x-1,y,depth-1);
+    recursiveFog(x,y+1,depth-1);
+    recursiveFog(x,y-1,depth-1);
 }
 
 //Sets url and calls connect event
