@@ -47,6 +47,7 @@ var maxStamina = 6;
 var visionPowFavour = 0;
 var visionPowTime = 0;
 var visionRange = 5;
+var revealAll = false;
 var movePowFavour = 0;
 var movePowTime = 0;
 
@@ -137,7 +138,7 @@ window.addEventListener("thisPlayerVisionPow", function () {
     visionPowFavour = 1;
     visionPowTime = 4;
     document.getElementById('visionPowDisplay').style.display = "inline";
-    document.getElementById('visionPowDisplay').innerHTML = "YOU WILL BE AFFECTED BY ENLIGHTEN";
+    document.getElementById('visionPowDisplay').innerHTML = "POWER WILL ACTIVATE NEXT TURN";
 });
 
 //This client collected the yellow power up (4)
@@ -146,7 +147,7 @@ window.addEventListener("thisPlayerMovePow", function () {
     movePowFavour = 1;
     movePowTime = 4;
     document.getElementById('movePowDisplay').style.display = "inline";
-    document.getElementById('movePowDisplay').innerHTML = "YOU WILL BE AFFECTED BY HASTE";
+    document.getElementById('movePowDisplay').innerHTML = "POWER WILL ACTIVATE NEXT TURN";
 });
 
 //Opponent client moved Up
@@ -372,7 +373,7 @@ function drawGame()
     {
         for(var x = 0; x < mapWidth; x++)
         {
-            if (fogmask[((y*mapWidth)+x)] != 1)
+            if (revealAll == true || fogmask[((y*mapWidth)+x)] != 1)
             {
                 switch(map[((y*mapWidth)+x)])
                 {
@@ -404,13 +405,13 @@ function drawGame()
                 switch(map[((y*mapWidth)+x)])
                 {
                     case 0:
-                        canvas.fillStyle = "#aaaaaa";
+                        canvas.fillStyle = "#bbbbbb";
                         break;
                     case 1:
                         canvas.fillStyle = "#444444";
                         break;
                     default:
-                        canvas.fillStyle = "#aaaaaa";
+                        canvas.fillStyle = "#bbbbbb";
                         break;                    
                 }
             }
@@ -657,6 +658,8 @@ function resetGame()
     map = initialMap.map((x) => x);;
     visionPowFavour = 0;
     visionPowTime = 0;
+    visionRange = 5;
+    revealAll = false;
     movePowFavour = 0;
     movePowTime = 0;
     maxStamina = 6
@@ -686,6 +689,8 @@ function updatePowerups()
         if (visionPowTime == 0)
         {
             visionPowFavour = 0;
+            visionRange = 5;
+            revealAll = false;
             document.getElementById('visionPowDisplay').style.display = "none";
             document.getElementById('visionPowDisplay').innerHTML = "";
         }
@@ -695,7 +700,7 @@ function updatePowerups()
         {
             if (currentPlayer == 9)
             {
-                //TODO: IMPLEMENT THIS
+                revealAll = true;
                 document.getElementById('visionPowDisplay').style.display = "inline";
                 document.getElementById('visionPowDisplay').innerHTML = "YOU ARE AFFECTED BY ENLIGHTEN";
             }
@@ -711,7 +716,7 @@ function updatePowerups()
         {
             if (currentPlayer == 9)
             {
-                //TODO: IMPLEMENT THIS
+                visionRange = 1;
                 document.getElementById('visionPowDisplay').style.display = "inline";
                 document.getElementById('visionPowDisplay').innerHTML = "YOU ARE AFFECTED BY BLINDNESS";
             }
@@ -773,16 +778,20 @@ function updatePowerups()
 
 function createFog()
 {
+    if (revealAll == true)
+    {
+        return;
+    }
+    
     fogmask = new Array(mapHeight*mapWidth).fill(1);
     getLocation(currentPlayer);
-    //console.log(fogmask);
     recursiveFog(targetLocation.x,targetLocation.y,visionRange);
 }
 
 function recursiveFog(x, y, depth)
 {
     //console.log("X: " + x + " Y: " + y + " D: " + depth)
-    if (depth <= 0 || y < 0 || y >= mapHeight || x < 0 || x >= mapWidth)
+    if (depth < 0 || y < 0 || y >= mapHeight || x < 0 || x >= mapWidth)
     {
         return;
     }
