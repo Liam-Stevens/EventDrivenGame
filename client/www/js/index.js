@@ -888,6 +888,7 @@ function updatePowerups()
             if (currentPlayer == 9)
             {
                 visionRange = 1;
+                revealAll = false;
                 document.getElementById('visionPowDisplay').style.display = "inline";
                 document.getElementById('visionPowDisplay').innerHTML = "YOU ARE AFFECTED BY BLINDNESS";
             }
