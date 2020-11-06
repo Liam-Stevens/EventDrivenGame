@@ -13,16 +13,26 @@ var dispStamina = null;
     9: runner
 */
 var map = [
-    8, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-    0, 1, 1, 1, 0, 0, 0, 0, 0, 0,
-    0, 1, 0, 0, 0, 4, 0, 0, 0, 0,
-    0, 1, 0, 0, 1, 1, 0, 0, 0, 0,
-    0, 0, 1, 0, 0, 0, 0, 1, 0, 0,
-    0, 0, 1, 0, 0, 0, 0, 1, 0, 0,
-    0, 0, 0, 0, 1, 1, 0, 0, 1, 0,
-    0, 0, 0, 5, 0, 0, 0, 0, 1, 0,
-    0, 0, 0, 0, 0, 0, 1, 1, 1, 0,
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 9,
+    8, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    0, 0, 0, 1, 1, 1, 1, 0, 0, 1, 0, 0, 1, 1, 1, 1, 1, 1, 0, 0,
+    0, 0, 1, 1, 0, 0, 0, 0, 0, 1, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0,
+    0, 0, 1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0,
+    0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1, 0, 0,
+    0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 5, 1, 0, 0,
+    0, 0, 1, 4, 0, 0, 1, 1, 1, 1, 1, 1, 1, 0, 0, 1, 1, 1, 0, 0,
+    0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    0, 0, 1, 0, 0, 1, 1, 1, 1, 0, 0, 1, 1, 1, 1, 0, 0, 1, 0, 0,
+    0, 0, 1, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0,
+    0, 0, 0, 0, 0, 1, 5, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0,
+    0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 0, 0, 1, 0, 0, 1, 0, 0,
+    0, 0, 1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 1, 0, 0,
+    0, 0, 1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 1, 0, 0,
+    0, 0, 1, 0, 0, 1, 0, 0, 0, 0, 4, 0, 0, 0, 1, 0, 0, 1, 0, 0,
+    0, 0, 1, 1, 1, 1, 0, 0, 0, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0,
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 9,
 ];
 
 var initialMap = map.map((x) => x);
@@ -32,17 +42,17 @@ var screenHeight = window.innerHeight-window.innerHeight/5;
 var screenWidth = window.screen.width;
 
 //Change this to screenWidth for production
-var display = screenWidth;
+var display = screenHeight;
 
-var mapWidth = 10, mapHeight = 10;
+var mapWidth = 20, mapHeight = 20;
 var tileWidth = display/mapWidth, tileHeight = display/mapHeight;
 
 var currentPlayer = 8;
 var oppPlayer = 9;
 var targetLocation = {x:0,y:0};
 
-var stamina = 6;
-var maxStamina = 6;
+var stamina = 10;
+var maxStamina = 10;
 
 var visionPowFavour = 0;
 var visionPowTime = 0;
@@ -143,19 +153,25 @@ window.addEventListener("thisPlayerEndTurn", function () {
 //This client collected the green power up (5)
 var thisPlayerVisionPow = new Event("thisPlayerVisionPow");
 window.addEventListener("thisPlayerVisionPow", function () { 
+    if (visionPowFavour == 0)
+    {
+        document.getElementById('visionPowDisplay').style.display = "inline";
+        document.getElementById('visionPowDisplay').innerHTML = "POWER WILL ACTIVATE NEXT TURN";
+    }
     visionPowFavour = 1;
     visionPowTime = 4;
-    document.getElementById('visionPowDisplay').style.display = "inline";
-    document.getElementById('visionPowDisplay').innerHTML = "POWER WILL ACTIVATE NEXT TURN";
 });
 
 //This client collected the yellow power up (4)
 var thisPlayerMovePow = new Event("thisPlayerMovePow");
 window.addEventListener("thisPlayerMovePow", function () { 
+    if (movePowFavour == 0)
+    {
+        document.getElementById('movePowDisplay').style.display = "inline";
+        document.getElementById('movePowDisplay').innerHTML = "POWER WILL ACTIVATE NEXT TURN";
+    }   
     movePowFavour = 1;
     movePowTime = 4;
-    document.getElementById('movePowDisplay').style.display = "inline";
-    document.getElementById('movePowDisplay').innerHTML = "POWER WILL ACTIVATE NEXT TURN";
 });
 
 //Opponent client moved Up
@@ -697,7 +713,7 @@ function resetGame()
     revealAll = false;
     movePowFavour = 0;
     movePowTime = 0;
-    maxStamina = 6
+    maxStamina = 10;
     clearInterval(timerInterval);
     timer = 20;
     document.getElementById('timer').innerHTML = timer;
@@ -776,7 +792,7 @@ function updatePowerups()
         if (movePowTime == 0)
         {
             movePowFavour = 0;
-            maxStamina = 6;
+            maxStamina = 10;
             document.getElementById('movePowDisplay').style.display = "none";
             document.getElementById('movePowDisplay').innerHTML = "";
         }
@@ -786,7 +802,7 @@ function updatePowerups()
         {
             if (currentPlayer == 8)
             {
-                maxStamina = 8;
+                maxStamina = 15;
                 document.getElementById('movePowDisplay').style.display = "inline";
                 document.getElementById('movePowDisplay').innerHTML = "YOU ARE AFFECTED BY HASTE";
             }
@@ -802,7 +818,7 @@ function updatePowerups()
         {
             if (currentPlayer == 8)
             {
-                maxStamina = 4;
+                maxStamina = 5;
                 document.getElementById('movePowDisplay').style.display = "inline";
                 document.getElementById('movePowDisplay').innerHTML = "YOU ARE AFFECTED BY FATIGUE";
             }
